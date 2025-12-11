@@ -1,0 +1,375 @@
+version: '3'
+
+# PhotonDB Kubernetes Deployment Tasks
+
+vars:
+  NAMESPACE: '{{.NAMESPACE | default "photondb"}}'
+  REPLICAS: '{{.REPLICAS | default "3"}}'
+  STORAGE_CLASS: '{{.STORAGE_CLASS | default "fast-ssd"}}'
+  STORAGE_SIZE: '{{.STORAGE_SIZE | default "100Gi"}}'
+  CPU_REQUEST: '{{.CPU_REQUEST | default "500m"}}'
+  MEMORY_REQUEST: '{{.MEMORY_REQUEST | default "1Gi"}}'
+  CPU_LIMIT: '{{.CPU_LIMIT | default "2"}}'
+  MEMORY_LIMIT: '{{.MEMORY_LIMIT | default "4Gi"}}'
+
+tasks:
+  # Main deployment tasks
+  default:
+    desc: Deploy PhotonDB cluster (default task)
+    cmds:
+      - task: deploy
+
+  deploy:
+    desc: Full deployment of PhotonDB cluster
+    cmds:
+      - task: check-prerequisites
+      - task: create-namespace
+      - task: apply-rbac
+      - task: apply-storage
+      - task: deploy-statefulset
+      - task: wait-for-pods
+      - task: verify
+      - task: connection-info
+      - task: show-logs
+
+  # Quick start tasks
+  quick-start:
+    desc: Interactive quick start deployment
+    cmds:
+      - |
+        echo "╔════════════════════════════════════════════╗"
+        echo "║   PhotonDB 1.0 - Kubernetes Quick Start    ║"
+        echo "╚════════════════════════════════════════════╝"
+        echo ""
+        echo "Select deployment mode:"
+        echo "  1) Development (1 replica, 10Gi storage)"
+        echo "  2) Staging (3 replicas, 50Gi storage)"
+        echo "  3) Production (5 replicas, 100Gi storage)"
+        echo ""
+        read -p "Enter choice [1-3]: " choice
+        case $choice in
+          1) task deploy NAMESPACE=photondb-dev REPLICAS=1 STORAGE_SIZE=10Gi CPU_REQUEST=250m MEMORY_REQUEST=512Mi CPU_LIMIT=1 MEMORY_LIMIT=2Gi ;;
+          2) task deploy NAMESPACE=photondb-staging REPLICAS=3 STORAGE_SIZE=50Gi CPU_REQUEST=500m MEMORY_REQUEST=1Gi CPU_LIMIT=2 MEMORY_LIMIT=4Gi ;;
+          3) task deploy NAMESPACE=photondb-prod REPLICAS=5 STORAGE_SIZE=100Gi CPU_REQUEST=1 MEMORY_REQUEST=2Gi CPU_LIMIT=4 MEMORY_LIMIT=8Gi ;;
+          *) echo "Invalid choice"; exit 1 ;;
+        esac
+
+  quick-dev:
+    desc: Quick deploy for development (1 replica)
+    cmds:
+      - task: deploy
+        vars:
+          NAMESPACE: photondb-dev
+          REPLICAS: 1
+          STORAGE_SIZE: 10Gi
+          CPU_REQUEST: 250m
+          MEMORY_REQUEST: 512Mi
+          CPU_LIMIT: 1
+          MEMORY_LIMIT: 2Gi
+
+  quick-staging:
+    desc: Quick deploy for staging (3 replicas)
+    cmds:
+      - task: deploy
+        vars:
+          NAMESPACE: photondb-staging
+          REPLICAS: 3
+          STORAGE_SIZE: 50Gi
+          CPU_REQUEST: 500m
+          MEMORY_REQUEST: 1Gi
+          CPU_LIMIT: 2
+          MEMORY_LIMIT: 4Gi
+
+  quick-prod:
+    desc: Quick deploy for production (5 replicas)
+    cmds:
+      - task: deploy
+        vars:
+          NAMESPACE: photondb-prod
+          REPLICAS: 5
+          STORAGE_SIZE: 100Gi
+          CPU_REQUEST: 1
+          MEMORY_REQUEST: 2Gi
+          CPU_LIMIT: 4
+          MEMORY_LIMIT: 8Gi
+
+  # Prerequisite checks
+  check-prerequisites:
+    desc: Check prerequisites (kubectl, cluster access, metrics-server)
+    cmds:
+      - echo "Checking prerequisites..."
+      - |
+        if ! command -v kubectl &> /dev/null; then
+          echo "❌ kubectl not found. Please install kubectl."
+          exit 1
+        fi
+        echo "✓ kubectl found"
+      - |
+        if ! kubectl cluster-info &> /dev/null; then
+          echo "❌ Cannot connect to Kubernetes cluster."
+          exit 1
+        fi
+        echo "✓ Connected to Kubernetes cluster"
+      - |
+        if ! kubectl get deployment metrics-server -n kube-system &> /dev/null; then
+          echo "⚠️  Metrics Server not found. HPA will not work without it."
+          echo "   Install: kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml"
+        else
+          echo "✓ Metrics Server found"
+        fi
+      - echo "Prerequisites check passed."
+
+  # Namespace management
+  create-namespace:
+    desc: Create namespace
+    cmds:
+      - echo "Creating namespace {{.NAMESPACE}}..."
+      - kubectl create namespace {{.NAMESPACE}} --dry-run=client -o yaml | kubectl apply -f -
+      - echo "Namespace ready."
+
+  # Apply configurations
+  apply-rbac:
+    desc: Apply RBAC configuration
+    cmds:
+      - echo "Applying RBAC..."
+      - kubectl apply -f k8s/rbac.yaml
+      - echo "RBAC applied."
+
+  apply-storage:
+    desc: Apply storage configuration
+    cmds:
+      - echo "Applying storage..."
+      - kubectl apply -f k8s/storage.yaml
+      - echo "Storage configured."
+
+  deploy-statefulset:
+    desc: Deploy StatefulSet with configured resources
+    cmds:
+      - echo "Deploying StatefulSet with {{.REPLICAS}} replicas..."
+      - |
+        sed -e "s/replicas: 3/replicas: {{.REPLICAS}}/" \
+            -e "s/storageClassName: fast-ssd/storageClassName: {{.STORAGE_CLASS}}/" \
+            -e "s/storage: 100Gi/storage: {{.STORAGE_SIZE}}/" \
+            -e "s/cpu: 500m/cpu: {{.CPU_REQUEST}}/" \
+            -e "s/memory: 1Gi/memory: {{.MEMORY_REQUEST}}/" \
+            -e "s/cpu: 2/cpu: {{.CPU_LIMIT}}/" \
+            -e "s/memory: 4Gi/memory: {{.MEMORY_LIMIT}}/" \
+            k8s/statefulset.yaml | kubectl apply -f -
+      - echo "StatefulSet deployed."
+
+  # Wait and verify
+  wait-for-pods:
+    desc: Wait for pods to be ready (timeout 300s)
+    cmds:
+      - echo "Waiting for pods to be ready..."
+      - kubectl wait --for=condition=ready pod -l app=photondb -n {{.NAMESPACE}} --timeout=300s
+      - echo "All pods are ready!"
+
+  verify:
+    desc: Verify deployment status
+    cmds:
+      - echo ""
+      - echo "=== Pods ==="
+      - kubectl get pods -n {{.NAMESPACE}} -o wide
+      - echo ""
+      - echo "=== StatefulSet ==="
+      - kubectl get statefulset -n {{.NAMESPACE}}
+      - echo ""
+      - echo "=== Services ==="
+      - kubectl get svc -n {{.NAMESPACE}}
+      - echo ""
+      - echo "=== PVCs ==="
+      - kubectl get pvc -n {{.NAMESPACE}}
+      - echo ""
+      - echo "=== HPA ==="
+      - kubectl get hpa -n {{.NAMESPACE}} || echo "No HPA found"
+      - echo ""
+      - echo "=== PDB ==="
+      - kubectl get pdb -n {{.NAMESPACE}} || echo "No PDB found"
+
+  connection-info:
+    desc: Show connection information
+    cmds:
+      - echo ""
+      - echo "Connection Information:"
+      - echo "======================="
+      - |
+        LB_IP=$(kubectl get svc photondb-client -n {{.NAMESPACE}} -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || echo "")
+        if [ -n "$LB_IP" ]; then
+          echo ""
+          echo "External Access:"
+          echo "  Client Port: $LB_IP:28015"
+          echo "  Web UI:      http://$LB_IP:8080"
+        else
+          echo ""
+          echo "LoadBalancer IP pending or not available."
+          echo "Use port-forward for local access:"
+          echo "  task port-forward-client"
+          echo "  task port-forward-ui"
+        fi
+      - echo ""
+      - echo "Internal Access (from within cluster):"
+      - echo "  Service: photondb-client.{{.NAMESPACE}}.svc.cluster.local:28015"
+      - echo ""
+      - echo "Metrics:"
+      - echo "  task port-forward-metrics"
+
+  # Port forwarding tasks
+  port-forward-client:
+    desc: Port-forward client connection (28015)
+    cmds:
+      - echo "Forwarding client port 28015..."
+      - kubectl port-forward -n {{.NAMESPACE}} svc/photondb-client 28015:28015
+
+  port-forward-ui:
+    desc: Port-forward Web UI (8080)
+    cmds:
+      - echo "Forwarding Web UI port 8080..."
+      - echo "Open: http://localhost:8080"
+      - kubectl port-forward -n {{.NAMESPACE}} svc/photondb-client 8080:8080
+
+  port-forward-metrics:
+    desc: Port-forward metrics endpoint (9090)
+    cmds:
+      - echo "Forwarding metrics port 9090..."
+      - echo "Open: http://localhost:9090/metrics"
+      - kubectl port-forward -n {{.NAMESPACE}} svc/photondb-metrics 9090:9090
+
+  # Logging
+  logs:
+    desc: Show logs from all pods (streaming)
+    cmds:
+      - kubectl logs -n {{.NAMESPACE}} -l app=photondb --tail=100 -f
+
+  show-logs:
+    desc: Show recent logs from first pod
+    cmds:
+      - echo "Recent logs from photondb-0:"
+      - kubectl logs -n {{.NAMESPACE}} photondb-0 --tail=50 || echo "Could not fetch logs"
+
+  # Scaling
+  scale:
+    desc: Scale StatefulSet to N replicas (usage: task scale -- N)
+    cmds:
+      - |
+        if [ -z "{{.CLI_ARGS}}" ]; then
+          echo "Usage: task scale -- N"
+          exit 1
+        fi
+        echo "Scaling to {{.CLI_ARGS}} replicas..."
+        kubectl scale statefulset photondb -n {{.NAMESPACE}} --replicas={{.CLI_ARGS}}
+      - task: wait-for-pods
+      - task: verify
+
+  # Cleanup
+  cleanup:
+    desc: Delete all PhotonDB resources
+    prompt: This will delete all resources in namespace {{.NAMESPACE}}. Continue?
+    cmds:
+      - echo "Deleting namespace {{.NAMESPACE}}..."
+      - kubectl delete namespace {{.NAMESPACE}}
+      - echo "Cleanup complete."
+
+  cleanup-force:
+    desc: Force delete without confirmation
+    cmds:
+      - echo "Force deleting namespace {{.NAMESPACE}}..."
+      - kubectl delete namespace {{.NAMESPACE}} --force --grace-period=0
+      - echo "Force cleanup complete."
+
+  # Status and monitoring
+  status:
+    desc: Show current cluster status
+    cmds:
+      - task: verify
+      - task: connection-info
+
+  describe:
+    desc: Describe all PhotonDB resources
+    cmds:
+      - echo "=== Describing StatefulSet ==="
+      - kubectl describe statefulset photondb -n {{.NAMESPACE}}
+      - echo ""
+      - echo "=== Describing Pods ==="
+      - kubectl describe pods -l app=photondb -n {{.NAMESPACE}}
+
+  events:
+    desc: Show recent events
+    cmds:
+      - kubectl get events -n {{.NAMESPACE}} --sort-by='.lastTimestamp'
+
+  top:
+    desc: Show resource usage
+    cmds:
+      - echo "=== Pod Resource Usage ==="
+      - kubectl top pods -n {{.NAMESPACE}}
+      - echo ""
+      - echo "=== Node Resource Usage ==="
+      - kubectl top nodes
+
+  # Development helpers
+  shell:
+    desc: Open shell in first pod
+    cmds:
+      - kubectl exec -it -n {{.NAMESPACE}} photondb-0 -- /bin/bash
+
+  exec:
+    desc: Execute command in first pod (usage: task exec -- "command")
+    cmds:
+      - kubectl exec -n {{.NAMESPACE}} photondb-0 -- {{.CLI_ARGS}}
+
+  # Testing
+  test-connection:
+    desc: Test database connection
+    cmds:
+      - echo "Testing connection to photondb-0..."
+      - kubectl exec -n {{.NAMESPACE}} photondb-0 -- curl -s http://localhost:8080/_health || echo "Health check failed"
+
+  # Backup and restore (placeholder)
+  backup:
+    desc: Create backup (not implemented)
+    cmds:
+      - echo "Backup functionality not yet implemented"
+      - echo "TODO: Implement backup strategy"
+
+  restore:
+    desc: Restore from backup (not implemented)
+    cmds:
+      - echo "Restore functionality not yet implemented"
+      - echo "TODO: Implement restore strategy"
+
+  # Help and documentation
+  help:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  info:
+    desc: Show deployment information
+    cmds:
+      - echo "PhotonDB Kubernetes Deployment"
+      - echo "================================"
+      - echo ""
+      - echo "Configuration:"
+      - echo "  Namespace:       {{.NAMESPACE}}"
+      - echo "  Replicas:        {{.REPLICAS}}"
+      - echo "  Storage Class:   {{.STORAGE_CLASS}}"
+      - echo "  Storage Size:    {{.STORAGE_SIZE}}"
+      - echo "  CPU Request:     {{.CPU_REQUEST}}"
+      - echo "  Memory Request:  {{.MEMORY_REQUEST}}"
+      - echo "  CPU Limit:       {{.CPU_LIMIT}}"
+      - echo "  Memory Limit:    {{.MEMORY_LIMIT}}"
+      - echo ""
+      - echo "Environment Variables:"
+      - echo "  Override any config with: NAMESPACE=xxx REPLICAS=5 task deploy"
+      - echo ""
+      - echo "Common Tasks:"
+      - echo "  task deploy          - Full deployment"
+      - echo "  task quick-dev       - Quick dev setup"
+      - echo "  task quick-prod      - Quick prod setup"
+      - echo "  task verify          - Check status"
+      - echo "  task logs            - Stream logs"
+      - echo "  task scale -- 7      - Scale to 7 replicas"
+      - echo "  task cleanup         - Delete everything"
+      - echo ""
+      - echo "For full list: task --list"
