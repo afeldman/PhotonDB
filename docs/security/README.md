@@ -2,7 +2,7 @@
 
 ## Overview
 
-RethinkDB 3.0 implements enterprise-grade security with multiple layers of protection:
+PhotonDB implements enterprise-grade security with multiple layers of protection:
 
 - **OAuth2 Multi-Provider Authentication**
 - **Honeytrap Integration** for automatic threat blocking

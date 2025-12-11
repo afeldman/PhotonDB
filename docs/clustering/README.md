@@ -2,7 +2,7 @@
 
 ## Overview
 
-RethinkDB 3.0 supports distributed deployments with:
+PhotonDB supports distributed deployments with:
 
 - **Horizontal Scaling** via sharding (16 shards default)
 - **Master-Replica Architecture** (3 replicas default)

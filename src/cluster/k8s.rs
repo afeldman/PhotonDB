@@ -133,7 +133,7 @@ impl K8sClusterManager {
                             ]),
                             env: Some(vec![
                                 EnvVar {
-                                    name: "RETHINKDB_CLUSTER_MODE".to_string(),
+                                    name: "PHOTONDB_CLUSTER_MODE".to_string(),
                                     value: Some("kubernetes".to_string()),
                                     ..Default::default()
                                 },

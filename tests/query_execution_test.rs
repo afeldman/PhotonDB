@@ -9,7 +9,7 @@ use std::sync::Arc;
 #[tokio::test]
 async fn test_query_compilation_and_execution() {
     // Create storage
-    let temp_dir = std::env::temp_dir().join(format!("rethinkdb_test_{}", std::process::id()));
+    let temp_dir = std::env::temp_dir().join(format!("photondb_test_{}", std::process::id()));
     let storage = Arc::new(Storage::new(Box::new(
         SledStorage::new(temp_dir.to_str().unwrap()).expect("Failed to create storage"),
     )));
@@ -78,7 +78,7 @@ async fn test_query_compilation_and_execution() {
 #[tokio::test]
 async fn test_datum_to_json_conversion() {
     // Test bidirectional conversion using direct datum creation
-    let temp_dir = std::env::temp_dir().join(format!("rethinkdb_test2_{}", std::process::id()));
+    let temp_dir = std::env::temp_dir().join(format!("photondb_test2_{}", std::process::id()));
     let storage = Arc::new(Storage::new(Box::new(
         SledStorage::new(temp_dir.to_str().unwrap()).expect("Failed to create storage"),
     )));

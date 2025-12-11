@@ -44,27 +44,27 @@ impl Default for DiscoveryConfig {
 impl DiscoveryConfig {
     /// Load from environment variables
     pub fn from_env() -> Self {
-        let enabled = std::env::var("RETHINKDB_K8S_DISCOVERY")
+        let enabled = std::env::var("PHOTONDB_K8S_DISCOVERY")
             .unwrap_or_else(|_| "false".to_string())
             .parse()
             .unwrap_or(false);
 
-        let service_name = std::env::var("RETHINKDB_SERVICE_NAME")
+        let service_name = std::env::var("PHOTONDB_SERVICE_NAME")
             .unwrap_or_else(|_| "rethinkdb".to_string());
 
-        let namespace = std::env::var("RETHINKDB_NAMESPACE")
+        let namespace = std::env::var("PHOTONDB_NAMESPACE")
             .or_else(|_| {
                 // Try to read namespace from service account
                 std::fs::read_to_string("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
             })
             .unwrap_or_else(|_| "default".to_string());
 
-        let cluster_port = std::env::var("RETHINKDB_CLUSTER_PORT")
+        let cluster_port = std::env::var("PHOTONDB_CLUSTER_PORT")
             .unwrap_or_else(|_| "29015".to_string())
             .parse()
             .unwrap_or(29015);
 
-        let discovery_interval_secs = std::env::var("RETHINKDB_DISCOVERY_INTERVAL")
+        let discovery_interval_secs = std::env::var("PHOTONDB_DISCOVERY_INTERVAL")
             .unwrap_or_else(|_| "30".to_string())
             .parse()
             .unwrap_or(30);

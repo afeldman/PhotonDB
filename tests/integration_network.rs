@@ -12,7 +12,7 @@ use tokio::time::{timeout, Duration};
 async fn start_test_server() -> (ProtocolServer, std::net::SocketAddr) {
     // Use unique temp directory for each test
     let temp_dir = std::env::temp_dir().join(format!(
-        "rethinkdb_test_{}",
+        "photondb_test_{}",
         std::process::id()
     ));
     let storage = Arc::new(Storage::new(Box::new(

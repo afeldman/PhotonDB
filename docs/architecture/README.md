@@ -1,6 +1,6 @@
-# RethinkDB Architecture Visualizations
+# PhotonDB Architecture Visualizations
 
-This directory contains Graphviz diagrams that visualize the RethinkDB 3.0 database hierarchy and storage architecture.
+This directory contains Graphviz diagrams that visualize the PhotonDB database hierarchy and storage architecture.
 
 ## Diagrams
 

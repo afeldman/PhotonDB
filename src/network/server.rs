@@ -117,7 +117,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_server_creation() {
-        let temp_dir = std::env::temp_dir().join(format!("rethinkdb_test_{}", std::process::id()));
+        let temp_dir = std::env::temp_dir().join(format!("photondb_test_{}", std::process::id()));
         let storage = Arc::new(Storage::new(Box::new(
             SlabStorageEngine::with_defaults(temp_dir.to_str().unwrap()).expect("Failed to create storage")
         )));
@@ -130,7 +130,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_connection_limit() {
-        let temp_dir = std::env::temp_dir().join(format!("rethinkdb_test2_{}", std::process::id()));
+        let temp_dir = std::env::temp_dir().join(format!("photondb_test2_{}", std::process::id()));
         let storage = Arc::new(Storage::new(Box::new(
             SlabStorageEngine::with_defaults(temp_dir.to_str().unwrap()).expect("Failed to create storage")
         )));

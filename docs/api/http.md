@@ -159,10 +159,10 @@ GET /_metrics
 **Response:**
 
 ```
-# RethinkDB 3.0 Metrics
-rethinkdb_queries_total 1234
-rethinkdb_queries_duration_seconds_sum 45.6
-rethinkdb_storage_size_bytes 1048576
+# PhotonDB Metrics
+photondb_queries_total 1234
+photondb_queries_duration_seconds_sum 45.6
+photondb_storage_size_bytes 1048576
 ```
 
 **Public endpoint** - No authentication required.
@@ -231,4 +231,4 @@ X-RateLimit-Reset: 1670544000
 
 ---
 
-**Full API reference for RethinkDB 3.0**
+**Full API reference for PhotonDB**

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build macOS DMG for RethinkDB 3.0
+# Build macOS DMG for PhotonDB
 
 set -e
 
@@ -16,7 +16,7 @@ mkdir -p "${BUILD_DIR}/${APP_NAME}/Contents/MacOS"
 mkdir -p "${BUILD_DIR}/${APP_NAME}/Contents/Resources"
 
 # Copy binary
-cp bin/rethinkdb-macos-x86_64 "${BUILD_DIR}/${APP_NAME}/Contents/MacOS/rethinkdb"
+cp bin/photondb-macos-x86_64 "${BUILD_DIR}/${APP_NAME}/Contents/MacOS/rethinkdb"
 chmod 755 "${BUILD_DIR}/${APP_NAME}/Contents/MacOS/rethinkdb"
 
 # Create Info.plist
@@ -66,7 +66,7 @@ echo -n "APPL????" > "${BUILD_DIR}/${APP_NAME}/Contents/PkgInfo"
 
 # Create README
 cat > "${BUILD_DIR}/README.txt" <<'EOF'
-RethinkDB 3.0 for macOS
+PhotonDB for macOS
 =======================
 
 Installation
@@ -80,7 +80,7 @@ Quick Start
 -----------
 
 Start server:
-  /Applications/RethinkDB.app/Contents/MacOS/rethinkdb serve --dev-mode
+  /Applications/RethinkDB.app/Contents/MacOS/photondb serve --dev-mode
 
 Or add to PATH:
   export PATH="/Applications/RethinkDB.app/Contents/MacOS:$PATH"
@@ -92,8 +92,8 @@ Access admin UI:
 CLI Usage
 ---------
 
-  rethinkdb db create myapp
-  rethinkdb table create --db myapp users
+  photondb db create myapp
+  photondb table create --db myapp users
   rethinkdb --help
 
 Documentation

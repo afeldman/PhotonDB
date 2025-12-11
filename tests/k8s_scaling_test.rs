@@ -115,9 +115,9 @@ mod k8s_scaling_tests {
 
         // Export metrics
         let output = collector.export_metrics().unwrap();
-        assert!(output.contains("rethinkdb_cpu_usage_percent"));
-        assert!(output.contains("rethinkdb_memory_usage_bytes"));
-        assert!(output.contains("rethinkdb_active_connections"));
+        assert!(output.contains("photondb_cpu_usage_percent"));
+        assert!(output.contains("photondb_memory_usage_bytes"));
+        assert!(output.contains("photondb_active_connections"));
     }
 
     #[tokio::test]

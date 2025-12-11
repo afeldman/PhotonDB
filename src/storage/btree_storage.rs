@@ -175,7 +175,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_btree_storage_basic_ops() -> Result<()> {
-        let temp_path = format!("/tmp/rethinkdb_test_{}.btree", std::process::id());
+        let temp_path = format!("/tmp/photondb_test_{}.btree", std::process::id());
         let storage = BTreeStorage::new(temp_path, Some(10))?;
 
         // Test set
@@ -196,7 +196,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_btree_storage_complex_datum() -> Result<()> {
-        let temp_path = format!("/tmp/rethinkdb_test_complex_{}.btree", std::process::id());
+        let temp_path = format!("/tmp/photondb_test_complex_{}.btree", std::process::id());
         let storage = BTreeStorage::new(temp_path, Some(10))?;
 
         // Test with complex datum

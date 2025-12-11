@@ -1,6 +1,6 @@
-//! RethinkDB 3.0 Server Binary
+//! PhotonDB Server Binary
 //!
-//! Complete command-line interface for RethinkDB 3.0 with support for:
+//! Complete command-line interface for PhotonDB with support for:
 //! - Server management (start, stop, status)
 //! - Database operations (create, drop, list)
 //! - Table operations (create, drop, list)
@@ -33,11 +33,11 @@ use tracing::{error, info, warn};
 use tracing_appender::rolling::{RollingFileAppender, Rotation};
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
-/// RethinkDB 3.0 - The Scientific Computing Database
+/// PhotonDB - The Scientific Computing Database
 #[derive(Parser, Debug)]
 #[command(name = "rethinkdb")]
 #[command(version = rethinkdb::VERSION)]
-#[command(about = "RethinkDB 3.0 - The Scientific Computing Database", long_about = None)]
+#[command(about = "PhotonDB - The Scientific Computing Database", long_about = None)]
 #[command(author = "Anton Feldmann <afeldman@lynqtech.com>")]
 struct Cli {
     /// Subcommand to execute
@@ -49,12 +49,12 @@ struct Cli {
         long,
         global = true,
         default_value = "data/rethinkdb",
-        env = "RETHINKDB_DATA"
+        env = "PHOTONDB_DATA"
     )]
     data_dir: PathBuf,
 
     /// Log directory path
-    #[arg(long, global = true, default_value = "logs", env = "RETHINKDB_LOG_DIR")]
+    #[arg(long, global = true, default_value = "logs", env = "PHOTONDB_LOG_DIR")]
     log_dir: PathBuf,
 
     /// Log level (trace, debug, info, warn, error)
@@ -106,11 +106,11 @@ enum Commands {
 #[derive(Args, Debug)]
 struct ServeArgs {
     /// HTTP bind address
-    #[arg(short, long, default_value = "127.0.0.1", env = "RETHINKDB_BIND")]
+    #[arg(short, long, default_value = "127.0.0.1", env = "PHOTONDB_BIND")]
     bind: String,
 
     /// HTTP port
-    #[arg(short, long, default_value = "8080", env = "RETHINKDB_PORT")]
+    #[arg(short, long, default_value = "8080", env = "PHOTONDB_PORT")]
     port: u16,
 
     /// Enable CORS
@@ -331,7 +331,7 @@ fn setup_logging(cli: &Cli) -> anyhow::Result<()> {
 
 /// Serve command - start the RethinkDB server
 async fn serve_command(data_dir: PathBuf, args: ServeArgs) -> anyhow::Result<()> {
-    info!("🚀 RethinkDB 3.0 starting...");
+    info!("🚀 PhotonDB starting...");
     info!(version = %rethinkdb::VERSION, "Version information");
 
     // Initialize storage

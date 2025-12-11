@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build Debian package for RethinkDB 3.0
+# Build Debian package for PhotonDB
 
 set -e
 
@@ -21,8 +21,8 @@ mkdir -p "${BUILD_DIR}/var/lib/rethinkdb"
 mkdir -p "${BUILD_DIR}/var/log/rethinkdb"
 
 # Copy binary
-cp bin/rethinkdb-linux-x86_64 "${BUILD_DIR}/usr/bin/rethinkdb"
-chmod 755 "${BUILD_DIR}/usr/bin/rethinkdb"
+cp bin/photondb-linux-x86_64 "${BUILD_DIR}/usr/bin/photondb"
+chmod 755 "${BUILD_DIR}/usr/bin/photondb"
 
 # Create control file
 cat > "${BUILD_DIR}/DEBIAN/control" <<EOF
@@ -32,7 +32,7 @@ Section: database
 Priority: optional
 Architecture: ${ARCH}
 Maintainer: Anton Feldmann <anton.feldmann@gmail.com>
-Description: RethinkDB 3.0 - The Scientific Computing Database
+Description: PhotonDB - The Scientific Computing Database
  A modern, real-time database written in Rust.
  Features include real-time changefeeds, horizontal scaling,
  and a powerful query language.
@@ -78,16 +78,16 @@ chmod 755 "${BUILD_DIR}/DEBIAN/prerm"
 # Systemd service
 cat > "${BUILD_DIR}/lib/systemd/system/rethinkdb.service" <<'EOF'
 [Unit]
-Description=RethinkDB 3.0 Server
+Description=PhotonDB Server
 After=network.target
 
 [Service]
 Type=simple
 User=rethinkdb
 Group=rethinkdb
-Environment="RETHINKDB_DATA=/var/lib/rethinkdb"
-Environment="RETHINKDB_LOG_DIR=/var/log/rethinkdb"
-ExecStart=/usr/bin/rethinkdb serve --bind 0.0.0.0 --port 28015
+Environment="PHOTONDB_DATA=/var/lib/rethinkdb"
+Environment="PHOTONDB_LOG_DIR=/var/log/rethinkdb"
+ExecStart=/usr/bin/photondb serve --bind 0.0.0.0 --port 28015
 Restart=on-failure
 RestartSec=10
 
@@ -97,7 +97,7 @@ EOF
 
 # Documentation
 cat > "${BUILD_DIR}/usr/share/doc/${PACKAGE_NAME}/README.Debian" <<'EOF'
-RethinkDB 3.0 for Debian
+PhotonDB for Debian
 ========================
 
 Quick Start
@@ -126,13 +126,13 @@ CLI Usage
 ---------
 
 List databases:
-  rethinkdb db list
+  photondb db list
 
 Create database:
-  rethinkdb db create myapp
+  photondb db create myapp
 
 Create table:
-  rethinkdb table create --db myapp users
+  photondb table create --db myapp users
 
 See 'rethinkdb --help' for more commands.
 

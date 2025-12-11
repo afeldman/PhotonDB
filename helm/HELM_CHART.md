@@ -5,7 +5,7 @@
 
 ## Overview
 
-This directory contains the official Helm chart for deploying RethinkDB 3.0 on Kubernetes with full auto-scaling, monitoring, and high-availability support.
+This directory contains the official Helm chart for deploying PhotonDB on Kubernetes with full auto-scaling, monitoring, and high-availability support.
 
 ## Chart Structure
 

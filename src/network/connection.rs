@@ -188,7 +188,7 @@ impl Connection {
                 "t": 4, // SERVER_INFO
                 "r": [{
                     "id": "rethinkdb-3.0",
-                    "name": "RethinkDB 3.0",
+                    "name": "PhotonDB",
                     "version": env!("CARGO_PKG_VERSION"),
                 }]
             }),

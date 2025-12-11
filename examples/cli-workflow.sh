@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# RethinkDB 3.0 CLI Workflow Example
+# PhotonDB CLI Workflow Example
 #
 # This script demonstrates the complete CLI workflow for managing
 # databases, tables, and data using the RethinkDB command-line interface.
@@ -10,10 +10,10 @@
 
 set -e  # Exit on error
 
-RETHINKDB="./target/release/rethinkdb"
+RETHINKDB="./target/release/photondb"
 DATA_DIR="example_data"
 
-echo "🚀 RethinkDB 3.0 CLI Workflow Demo"
+echo "🚀 PhotonDB CLI Workflow Demo"
 echo "=================================="
 echo
 
@@ -96,7 +96,7 @@ echo "💡 Tips:"
 echo "   - Use --data-dir to specify custom data location"
 echo "   - Use --log-level to control verbosity"
 echo "   - Use --force to skip confirmation prompts"
-echo "   - Set RETHINKDB_DATA env var for default data directory"
+echo "   - Set PHOTONDB_DATA env var for default data directory"
 echo
 echo "📖 See CLI.md for complete documentation"
 echo

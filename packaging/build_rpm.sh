@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build RPM package for RethinkDB 3.0
+# Build RPM package for PhotonDB
 
 set -e
 
@@ -23,15 +23,15 @@ mkdir -p "${BUILD_DIR}/BUILD/${PACKAGE_NAME}-${VERSION}"
 
 # Copy binary
 mkdir -p "${BUILD_DIR}/BUILD/${PACKAGE_NAME}-${VERSION}/usr/bin"
-cp bin/rethinkdb-linux-x86_64 "${BUILD_DIR}/BUILD/${PACKAGE_NAME}-${VERSION}/usr/bin/rethinkdb"
-chmod 755 "${BUILD_DIR}/BUILD/${PACKAGE_NAME}-${VERSION}/usr/bin/rethinkdb"
+cp bin/photondb-linux-x86_64 "${BUILD_DIR}/BUILD/${PACKAGE_NAME}-${VERSION}/usr/bin/photondb"
+chmod 755 "${BUILD_DIR}/BUILD/${PACKAGE_NAME}-${VERSION}/usr/bin/photondb"
 
 # Create spec file
 cat > "${BUILD_DIR}/SPECS/${PACKAGE_NAME}.spec" <<EOF
 Name:           ${PACKAGE_NAME}
 Version:        ${VERSION}
 Release:        ${RELEASE}%{?dist}
-Summary:        RethinkDB 3.0 - The Scientific Computing Database
+Summary:        PhotonDB - The Scientific Computing Database
 License:        Apache-2.0
 URL:            https://rethinkdb.com
 BuildArch:      ${ARCH}
@@ -55,21 +55,21 @@ mkdir -p %{buildroot}/usr/lib/systemd/system
 mkdir -p %{buildroot}/var/lib/rethinkdb
 mkdir -p %{buildroot}/var/log/rethinkdb
 
-install -m 755 ../BUILD/${PACKAGE_NAME}-${VERSION}/usr/bin/rethinkdb %{buildroot}/usr/bin/rethinkdb
+install -m 755 ../BUILD/${PACKAGE_NAME}-${VERSION}/usr/bin/photondb %{buildroot}/usr/bin/photondb
 
 # Systemd service
 cat > %{buildroot}/usr/lib/systemd/system/rethinkdb.service <<'SVCEOF'
 [Unit]
-Description=RethinkDB 3.0 Server
+Description=PhotonDB Server
 After=network.target
 
 [Service]
 Type=simple
 User=rethinkdb
 Group=rethinkdb
-Environment="RETHINKDB_DATA=/var/lib/rethinkdb"
-Environment="RETHINKDB_LOG_DIR=/var/log/rethinkdb"
-ExecStart=/usr/bin/rethinkdb serve --bind 0.0.0.0 --port 28015
+Environment="PHOTONDB_DATA=/var/lib/rethinkdb"
+Environment="PHOTONDB_LOG_DIR=/var/log/rethinkdb"
+ExecStart=/usr/bin/photondb serve --bind 0.0.0.0 --port 28015
 Restart=on-failure
 RestartSec=10
 
@@ -78,7 +78,7 @@ WantedBy=multi-user.target
 SVCEOF
 
 %files
-/usr/bin/rethinkdb
+/usr/bin/photondb
 /usr/lib/systemd/system/rethinkdb.service
 %dir /var/lib/rethinkdb
 %dir /var/log/rethinkdb

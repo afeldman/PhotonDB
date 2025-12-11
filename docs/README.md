@@ -1,6 +1,10 @@
-# RethinkDB 3.0 Documentation
+# PhotonDB 1.0 Documentation
 
-Welcome to the official documentation for RethinkDB 3.0 - The Scientific Computing Database written in Rust.
+Welcome to the official documentation for **PhotonDB** - The Modern Rust Reimplementation of RethinkDB.
+
+PhotonDB is a ground-up rewrite of RethinkDB in Rust, modernizing the database for vectors, time-series, and AI/ML workloads while preserving RethinkDB's elegant query philosophy.
+
+**Current Version:** v0.1.0-alpha (Q4 2025) | **Target Release:** v1.0 (Q2 2026)
 
 ## 📚 Documentation Structure
 
@@ -39,7 +43,8 @@ Welcome to the official documentation for RethinkDB 3.0 - The Scientific Computi
 - [WebSocket API](api/websocket.md) - Real-time changefeeds
 - [ReQL Reference](api/reql.md) - Query language complete reference
 - [Admin API](api/admin.md) - Administrative operations
-- [GraphQL Strategy](GRAPHQL_STRATEGY.md) - Future GraphQL API (v3.1+)
+- [GraphQL Strategy](GRAPHQL_STRATEGY.md) - GraphQL API plan (v0.5+)
+- [Development Roadmap](DEVELOPMENT_ROADMAP.md) - v0.1 to v1.0 phases
 
 ### Deployment
 
@@ -97,7 +102,9 @@ This documentation follows these principles:
 
 ## 📝 Version Information
 
-- **Current Version**: 3.0.0-alpha
+- **Current Version**: 0.1.0-alpha
+- **Target Release**: v1.0 (Q2 2026)
+- **Release Cycle**: 10 phases from v0.1 to v1.0
 - **Rust Edition**: 2021
 - **Protocol**: Cap'n Proto 0.23
 - **Last Updated**: 2025-12-09

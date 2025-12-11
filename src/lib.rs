@@ -1,5 +1,5 @@
-// RethinkDB - Rust Implementation
-// A distributed realtime document database
+// PhotonDB - Modern Rust Implementation
+// Modern Rust reimplementation and modernization of RethinkDB
 
 #![warn(rust_2018_idioms)]
 #![allow(dead_code)] // During development

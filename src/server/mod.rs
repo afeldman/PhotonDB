@@ -1,4 +1,4 @@
-//! RethinkDB 3.0 Server Implementation
+//! PhotonDB Server Implementation
 //!
 //! Rust-based web server using axum framework (replaces JavaScript/Node.js)
 
@@ -84,30 +84,30 @@ pub struct ClusterConfig {
 
 impl ClusterConfig {
     pub fn from_env() -> Self {
-        let enabled = std::env::var("RETHINKDB_CLUSTER_ENABLED")
+        let enabled = std::env::var("PHOTONDB_CLUSTER_ENABLED")
             .unwrap_or_else(|_| "false".to_string())
             .parse()
             .unwrap_or(false);
 
-        let node_id = std::env::var("RETHINKDB_NODE_ID")
+        let node_id = std::env::var("PHOTONDB_NODE_ID")
             .unwrap_or_else(|_| format!("node-{}", uuid::Uuid::new_v4()));
 
-        let mode = std::env::var("RETHINKDB_CLUSTER_MODE")
+        let mode = std::env::var("PHOTONDB_CLUSTER_MODE")
             .unwrap_or_else(|_| "standalone".to_string());
 
-        let peers = std::env::var("RETHINKDB_PEERS")
+        let peers = std::env::var("PHOTONDB_PEERS")
             .unwrap_or_default()
             .split(',')
             .filter(|s| !s.is_empty())
             .map(|s| s.to_string())
             .collect();
 
-        let replica_count = std::env::var("RETHINKDB_REPLICA_COUNT")
+        let replica_count = std::env::var("PHOTONDB_REPLICA_COUNT")
             .unwrap_or_else(|_| "3".to_string())
             .parse()
             .unwrap_or(3);
 
-        let shard_count = std::env::var("RETHINKDB_SHARD_COUNT")
+        let shard_count = std::env::var("PHOTONDB_SHARD_COUNT")
             .unwrap_or_else(|_| "16".to_string())
             .parse()
             .unwrap_or(16);
@@ -137,7 +137,7 @@ pub async fn start_server(
     info!(
         addr = %config.http_addr,
         port = config.http_port,
-        "Starting RethinkDB 3.0 HTTP server"
+        "Starting PhotonDB HTTP server"
     );
 
     // Load cluster configuration
@@ -251,13 +251,13 @@ pub async fn start_server(
     info!("📊 Metrics collector started");
 
     // Start auto-scaler if enabled
-    let autoscaling_enabled = std::env::var("RETHINKDB_AUTOSCALING_ENABLED")
+    let autoscaling_enabled = std::env::var("PHOTONDB_AUTOSCALING_ENABLED")
         .unwrap_or_else(|_| "false".to_string())
         .parse()
         .unwrap_or(false);
 
     if autoscaling_enabled && cluster_config.enabled {
-        let strategy_name = std::env::var("RETHINKDB_SCALING_STRATEGY")
+        let strategy_name = std::env::var("PHOTONDB_SCALING_STRATEGY")
             .unwrap_or_else(|_| "hybrid".to_string());
 
         let strategy = match strategy_name.as_str() {

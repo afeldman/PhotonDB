@@ -184,5 +184,5 @@ pub async fn health_check() -> Response {
 /// Metrics endpoint (Prometheus format)
 pub async fn metrics() -> Response {
     // TODO: Implement Prometheus metrics
-    "# RethinkDB 3.0 Metrics\n".into_response()
+    "# PhotonDB Metrics\n".into_response()
 }

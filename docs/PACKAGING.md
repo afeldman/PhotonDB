@@ -1,6 +1,6 @@
 # Packaging & Release Guide
 
-This document describes how to build packages and create releases for RethinkDB 3.0.
+This document describes how to build packages and create releases for PhotonDB.
 
 ## Overview
 
@@ -42,7 +42,7 @@ This triggers:
 | macOS Intel         | Binary     | `rethinkdb-macos-x86_64`       |
 | macOS Apple Silicon | Binary     | `rethinkdb-macos-aarch64`      |
 | Windows x64         | Binary     | `rethinkdb-windows-x86_64.exe` |
-| Debian/Ubuntu       | Package    | `rethinkdb_3.0.0_amd64.deb`    |
+| Debian/Ubuntu       | Package    | `photondb_3.0.0_amd64.deb`    |
 | RPM/Fedora          | Package    | `rethinkdb-3.0.0-1.x86_64.rpm` |
 | macOS               | Disk Image | `RethinkDB-3.0.0.dmg`          |
 | Windows             | Installer  | `RethinkDB-3.0.0-x64.msi`      |
@@ -87,8 +87,8 @@ choco install wixtoolset
 cargo build --release --bin rethinkdb
 
 # Binary location
-./target/release/rethinkdb  # Linux/macOS
-./target/release/rethinkdb.exe  # Windows
+./target/release/photondb  # Linux/macOS
+./target/release/photondb.exe  # Windows
 ```
 
 #### Cross-compilation
@@ -118,8 +118,8 @@ cargo build --release --target aarch64-apple-darwin --bin rethinkdb
 
 # Create universal binary
 lipo -create \
-    target/x86_64-apple-darwin/release/rethinkdb \
-    target/aarch64-apple-darwin/release/rethinkdb \
+    target/x86_64-apple-darwin/release/photondb \
+    target/aarch64-apple-darwin/release/photondb \
     -output rethinkdb-universal
 ```
 
@@ -134,18 +134,18 @@ export GITHUB_REF_NAME=v3.0.0
 # Build binary first
 cargo build --release --bin rethinkdb
 mkdir -p bin
-cp target/release/rethinkdb bin/rethinkdb-linux-x86_64
+cp target/release/photondb bin/photondb-linux-x86_64
 
 # Build package
 ./packaging/build_deb.sh
 
-# Output: dist/rethinkdb_3.0.0_amd64.deb
+# Output: dist/photondb_3.0.0_amd64.deb
 ```
 
 **Test installation:**
 
 ```bash
-sudo dpkg -i dist/rethinkdb_3.0.0_amd64.deb
+sudo dpkg -i dist/photondb_3.0.0_amd64.deb
 rethinkdb --version
 ```
 
@@ -158,7 +158,7 @@ export GITHUB_REF_NAME=v3.0.0
 # Build binary first
 cargo build --release --bin rethinkdb
 mkdir -p bin
-cp target/release/rethinkdb bin/rethinkdb-linux-x86_64
+cp target/release/photondb bin/photondb-linux-x86_64
 
 # Build package
 ./packaging/build_rpm.sh
@@ -182,7 +182,7 @@ export GITHUB_REF_NAME=v3.0.0
 # Build binary first (Universal)
 cargo build --release --target x86_64-apple-darwin --bin rethinkdb
 mkdir -p bin
-cp target/x86_64-apple-darwin/release/rethinkdb bin/rethinkdb-macos-x86_64
+cp target/x86_64-apple-darwin/release/photondb bin/photondb-macos-x86_64
 
 # Build DMG
 ./packaging/build_dmg.sh
@@ -309,7 +309,7 @@ docker run -p 8080:8080 rethinkdb/rethinkdb:3.0.0 serve --dev-mode
 
 **Install locations:**
 
-- Binary: `/usr/bin/rethinkdb`
+- Binary: `/usr/bin/photondb`
 - Data: `/var/lib/rethinkdb`
 - Logs: `/var/log/rethinkdb`
 - Service: `/lib/systemd/system/rethinkdb.service`
@@ -330,7 +330,7 @@ sudo systemctl enable rethinkdb
 
 **Install locations:**
 
-- Binary: `/usr/bin/rethinkdb`
+- Binary: `/usr/bin/photondb`
 - Data: `/var/lib/rethinkdb`
 - Logs: `/var/log/rethinkdb`
 - Service: `/usr/lib/systemd/system/rethinkdb.service`

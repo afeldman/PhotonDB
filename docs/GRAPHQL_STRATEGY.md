@@ -1,34 +1,34 @@
-# GraphQL Strategy for RethinkDB 3.0
+# GraphQL Strategy for PhotonDB (v0.5+)
 
 ## Executive Summary
 
-GraphQL is a **perfect fit** for RethinkDB's real-time, declarative query philosophy. However, we will introduce it **incrementally** to maintain stability and backward compatibility.
+GraphQL is a **perfect fit** for PhotonDB's real-time, declarative query philosophy. However, we will introduce it **incrementally** to maintain stability and backward compatibility.
 
 ## Strategic Roadmap
 
-### Phase 1: v3.0 - Foundation (Current)
+### Phase 1: v0.1 - Foundation (Current - Q4 2025)
 
 **Status:** ✅ In Progress  
-**Timeline:** Q1 2025
+**Timeline:** Q4 2025 (now)
 
 **Focus:**
 
-- ✅ REST API with 7 endpoints
+- ✅ REST API with core endpoints
 - ✅ Database hierarchy (Databases → Tables → Documents)
 - ✅ WebSocket support for changefeeds
 - ✅ Security layer (OAuth2, JWT, Honeytrap)
 - ✅ CLI with clap
 
-**Decision:** ❌ No GraphQL in v3.0
+**Decision:** ❌ No GraphQL in v0.1
 
 - Prioritize core stability
 - REST API is simpler and proven
 - Focus on getting fundamentals right
 
-### Phase 2: v3.1 - GraphQL Beta (Experimental)
+### Phase 2: v0.5 - GraphQL Beta (Experimental)
 
 **Status:** 📋 Planned  
-**Timeline:** Q2 2025
+**Timeline:** Q3 2025 (after v0.2, v0.3, v0.4)
 
 **Scope:**
 
@@ -90,7 +90,7 @@ subscription WatchUsers {
 }
 ```
 
-### Phase 3: v3.2 - GraphQL Stable
+### Phase 3: v0.6+ - GraphQL Stable
 
 **Status:** 📋 Planned  
 **Timeline:** Q3 2025
@@ -110,7 +110,7 @@ subscription WatchUsers {
 - Automatic persisted queries (APQ)
 - GraphQL Federation support (for microservices)
 
-### Phase 4: v3.5+ - GraphQL First-Class
+### Phase 4: v0.8+ - GraphQL First-Class
 
 **Status:** 🔮 Future  
 **Timeline:** 2026+
@@ -278,7 +278,7 @@ scalar DateTime
 
 ## Implementation Guidelines
 
-### Phase 2 (v3.1) Checklist
+### Phase 2 (v0.5) Checklist
 
 **Setup:**
 
@@ -319,7 +319,7 @@ scalar DateTime
 - [ ] Subscription examples
 - [ ] Migration guide from REST
 
-### Code Example (v3.1)
+### Code Example (v0.5)
 
 ```rust
 // src/server/graphql/mod.rs
@@ -483,7 +483,7 @@ impl Table {
 
 ### For New Projects
 
-**Recommendation (v3.2+):**
+**Recommendation (v0.6+):**
 
 - Use GraphQL as primary API
 - Real-time features via subscriptions
@@ -492,7 +492,7 @@ impl Table {
 
 ## Success Metrics
 
-### Phase 2 (v3.1 Beta)
+### Phase 2 (v0.5 Beta)
 
 - [ ] GraphQL API handles 1000 req/s
 - [ ] Subscription latency < 50ms
@@ -500,7 +500,7 @@ impl Table {
 - [ ] Documentation completeness > 90%
 - [ ] Community feedback collected
 
-### Phase 3 (v3.2 Stable)
+### Phase 3 (v0.6 Stable)
 
 - [ ] GraphQL adoption > 30% of new projects
 - [ ] Performance parity with REST
@@ -508,7 +508,7 @@ impl Table {
 - [ ] Client libraries for major languages
 - [ ] Conference talks / blog posts
 
-### Phase 4 (v3.5+)
+### Phase 4 (v0.8+)
 
 - [ ] GraphQL becomes recommended API
 - [ ] 50%+ of traffic via GraphQL
@@ -537,12 +537,13 @@ impl Table {
 
 ## Conclusion
 
-GraphQL is the **future** of RethinkDB's API, but we'll introduce it **responsibly**:
+GraphQL is the **future** of PhotonDB's API, but we'll introduce it **responsibly**:
 
-1. ✅ **v3.0:** Focus on core (REST + ReQL)
-2. 🚧 **v3.1:** GraphQL Beta (experimental)
-3. ✅ **v3.2:** GraphQL Stable (production-ready)
-4. 🚀 **v3.5+:** GraphQL First-Class (recommended)
+1. ✅ **v0.1:** Focus on core (REST + ReQL)
+2. 🚧 **v0.2-0.4:** Storage, clustering, advanced queries
+3. 🚧 **v0.5:** GraphQL Beta (experimental)
+4. ✅ **v0.6:** GraphQL Stable (production-ready)
+5. 🚀 **v1.0:** GraphQL First-Class (production release)
 
 This strategy balances **innovation** with **stability**, ensuring we don't sacrifice RethinkDB's reliability for shiny new features.
 

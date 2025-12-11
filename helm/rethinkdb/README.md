@@ -178,9 +178,9 @@ helm install rethinkdb-prod ./helm/rethinkdb -f values-prod.yaml --namespace ret
 autoscaling:
   enabled: true
   customMetrics:
-    - name: rethinkdb_queries_per_second
+    - name: photondb_queries_per_second
       targetValue: 2000
-    - name: rethinkdb_active_connections
+    - name: photondb_active_connections
       targetValue: 1000
 metrics:
   enabled: true
