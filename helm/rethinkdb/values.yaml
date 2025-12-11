@@ -1,0 +1,354 @@
+# Default values for RethinkDB Helm Chart
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+## @section Global parameters
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+
+## @param nameOverride String to partially override rethinkdb.fullname
+## @param fullnameOverride String to fully override rethinkdb.fullname
+##
+nameOverride: ""
+fullnameOverride: ""
+
+## @param clusterDomain Kubernetes cluster domain name
+##
+clusterDomain: cluster.local
+
+## @section RethinkDB Image parameters
+
+## RethinkDB image
+## @param image.registry RethinkDB image registry
+## @param image.repository RethinkDB image repository
+## @param image.tag RethinkDB image tag (immutable tags are recommended)
+## @param image.pullPolicy RethinkDB image pull policy
+## @param image.pullSecrets RethinkDB image pull secrets
+##
+image:
+  registry: docker.io
+  repository: rethinkdb/rethinkdb
+  tag: "3.0.0"
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+## @section RethinkDB Cluster parameters
+
+## @param replicaCount Number of RethinkDB replicas
+##
+replicaCount: 3
+
+## @param clusterMode Cluster mode: standalone, master-replica, or kubernetes
+##
+clusterMode: kubernetes
+
+## @param shardCount Number of shards for horizontal scaling
+##
+shardCount: 16
+
+## @param replicationFactor Replication factor (how many copies of each shard)
+##
+replicationFactor: 3
+
+## @section Resource Management
+
+## RethinkDB resource requests and limits
+## @param resources.limits.cpu CPU limit
+## @param resources.limits.memory Memory limit
+## @param resources.requests.cpu CPU request
+## @param resources.requests.memory Memory request
+##
+resources:
+  limits:
+    cpu: 2
+    memory: 4Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+## @section Storage parameters
+
+## Persistent Volume Storage configuration
+## @param persistence.enabled Enable persistence using Persistent Volume Claims
+## @param persistence.storageClass Storage class of backing PVC
+## @param persistence.accessModes Persistent Volume Access Modes
+## @param persistence.size Size of data volume
+## @param persistence.annotations Persistent Volume Claim annotations
+##
+persistence:
+  enabled: true
+  storageClass: "fast-ssd"
+  accessModes:
+    - ReadWriteOnce
+  size: 100Gi
+  annotations: {}
+
+## @section Auto-scaling parameters
+
+## Horizontal Pod Autoscaler configuration
+## @param autoscaling.enabled Enable Horizontal Pod Autoscaler
+## @param autoscaling.minReplicas Minimum number of replicas
+## @param autoscaling.maxReplicas Maximum number of replicas
+## @param autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage
+## @param autoscaling.targetMemoryUtilizationPercentage Target Memory utilization percentage
+##
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+  ## Custom metrics for HPA
+  ## @param autoscaling.customMetrics Custom metrics for scaling
+  ##
+  customMetrics:
+    - name: rethinkdb_queries_per_second
+      targetValue: 1000
+    - name: rethinkdb_active_connections
+      targetValue: 500
+
+  ## Scaling behavior
+  ## @param autoscaling.behavior.scaleUp Scale-up behavior configuration
+  ## @param autoscaling.behavior.scaleDown Scale-down behavior configuration
+  ##
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+      selectPolicy: Max
+
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 300
+      selectPolicy: Min
+
+## Pod Disruption Budget
+## @param podDisruptionBudget.enabled Enable Pod Disruption Budget
+## @param podDisruptionBudget.minAvailable Minimum number of available pods
+##
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+## @section Service parameters
+
+## Service configuration
+## @param service.type Kubernetes Service type
+## @param service.clientPort Client port
+## @param service.clusterPort Cluster port
+## @param service.httpPort HTTP admin port
+## @param service.metricsPort Metrics port
+## @param service.annotations Service annotations
+## @param service.loadBalancerIP LoadBalancer IP for service type LoadBalancer
+##
+service:
+  type: LoadBalancer
+  clientPort: 28015
+  clusterPort: 29015
+  httpPort: 8080
+  metricsPort: 9090
+  annotations: {}
+  loadBalancerIP: ""
+
+## Headless service
+## @param headlessService.annotations Headless service annotations
+##
+headlessService:
+  annotations: {}
+
+## @section Health Check parameters
+
+## Health check configuration
+## @param livenessProbe.enabled Enable liveness probe
+## @param livenessProbe.initialDelaySeconds Initial delay seconds
+## @param livenessProbe.periodSeconds Period seconds
+## @param livenessProbe.timeoutSeconds Timeout seconds
+## @param livenessProbe.failureThreshold Failure threshold
+##
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+## @param readinessProbe.enabled Enable readiness probe
+## @param readinessProbe.initialDelaySeconds Initial delay seconds
+## @param readinessProbe.periodSeconds Period seconds
+## @param readinessProbe.timeoutSeconds Timeout seconds
+## @param readinessProbe.failureThreshold Failure threshold
+##
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+## @param startupProbe.enabled Enable startup probe
+## @param startupProbe.initialDelaySeconds Initial delay seconds
+## @param startupProbe.periodSeconds Period seconds
+## @param startupProbe.timeoutSeconds Timeout seconds
+## @param startupProbe.failureThreshold Failure threshold
+##
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 30
+
+## @section Security parameters
+
+## Pod Security Context
+## @param podSecurityContext.enabled Enable pod security context
+## @param podSecurityContext.fsGroup Group ID for the volumes
+## @param podSecurityContext.runAsUser User ID for the container
+## @param podSecurityContext.runAsNonRoot Run as non-root user
+##
+podSecurityContext:
+  enabled: true
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsNonRoot: true
+
+## Container Security Context
+## @param containerSecurityContext.enabled Enable container security context
+## @param containerSecurityContext.capabilities.drop Dropped capabilities
+##
+containerSecurityContext:
+  enabled: false
+  capabilities:
+    drop:
+      - ALL
+
+## @param serviceAccount.create Create service account
+## @param serviceAccount.name Service account name
+## @param serviceAccount.annotations Service account annotations
+##
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+## RBAC configuration
+## @param rbac.create Create RBAC resources
+##
+rbac:
+  create: true
+
+## @section Monitoring parameters
+
+## Prometheus Operator ServiceMonitor configuration
+## @param metrics.enabled Enable metrics
+## @param metrics.serviceMonitor.enabled Create ServiceMonitor resource
+## @param metrics.serviceMonitor.interval Scrape interval
+## @param metrics.serviceMonitor.scrapeTimeout Scrape timeout
+## @param metrics.serviceMonitor.namespace Namespace for the ServiceMonitor
+## @param metrics.serviceMonitor.labels Additional labels for ServiceMonitor
+##
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: 10s
+    namespace: ""
+    labels: {}
+
+## @section Node Selection parameters
+
+## @param nodeSelector Node labels for pod assignment
+## @param tolerations Tolerations for pod assignment
+## @param affinity Affinity for pod assignment
+##
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - rethinkdb
+          topologyKey: kubernetes.io/hostname
+
+## @section Configuration parameters
+
+## RethinkDB configuration
+## @param config.cacheSize Cache size in MB
+## @param config.ioThreads Number of I/O threads
+## @param config.logLevel Log level (debug, info, notice, warn, error)
+##
+config:
+  cacheSize: 2048
+  ioThreads: 64
+  logLevel: info
+
+## Environment variables
+## @param extraEnvVars Extra environment variables
+##
+extraEnvVars: []
+# - name: CUSTOM_VAR
+#   value: "custom_value"
+
+## @section Init Container parameters
+
+## @param initContainers.enabled Enable init containers
+##
+initContainers:
+  enabled: true
+
+## @section Pod parameters
+
+## @param podLabels Extra labels for pods
+## @param podAnnotations Extra annotations for pods
+##
+podLabels: {}
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9090"
+  prometheus.io/path: "/metrics"
+
+## @param updateStrategy.type Update strategy type
+##
+updateStrategy:
+  type: RollingUpdate
+
+## @param terminationGracePeriodSeconds Termination grace period
+##
+terminationGracePeriodSeconds: 60
+
+## @section Network Policy parameters
+
+## @param networkPolicy.enabled Enable network policy
+## @param networkPolicy.allowExternal Allow external traffic
+##
+networkPolicy:
+  enabled: false
+  allowExternal: true

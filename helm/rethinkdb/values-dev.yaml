@@ -1,0 +1,60 @@
+# Development values for RethinkDB
+# Minimal resources for local development
+
+replicaCount: 1
+
+image:
+  pullPolicy: Always
+
+# Minimal resources
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 1
+    memory: 2Gi
+
+# Small storage
+persistence:
+  enabled: true
+  storageClass: standard
+  size: 10Gi
+
+# Disable auto-scaling
+autoscaling:
+  enabled: false
+
+# Disable PDB
+podDisruptionBudget:
+  enabled: false
+
+# ClusterIP service
+service:
+  type: ClusterIP
+
+# Minimal monitoring
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+
+# Simple configuration
+config:
+  cacheSize: 512
+  ioThreads: 16
+  logLevel: debug
+
+# No affinity rules
+affinity: {}
+
+# No node selector
+nodeSelector: {}
+
+# Relaxed security for local dev
+podSecurityContext:
+  enabled: false
+
+# No network policies
+networkPolicy:
+  enabled: false

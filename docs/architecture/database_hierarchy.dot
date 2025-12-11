@@ -1,0 +1,132 @@
+// RethinkDB Database Hierarchy Architecture
+// Compile with: dot -Tpng database_hierarchy.dot -o database_hierarchy.png
+// Or: dot -Tsvg database_hierarchy.dot -o database_hierarchy.svg
+
+digraph RethinkDBHierarchy {
+    // Graph settings
+    rankdir=TB;
+    node [shape=record, fontname="Helvetica", fontsize=10];
+    edge [fontname="Helvetica", fontsize=9];
+    
+    // Title
+    labelloc="t";
+    label=<<b>RethinkDB 3.0 Database Hierarchy Architecture</b>>;
+    fontsize=14;
+    
+    // Cluster: Storage Layer
+    subgraph cluster_storage {
+        label="Storage Layer (Sled B-Tree)";
+        style=filled;
+        color=lightgrey;
+        
+        // Metadata Trees
+        subgraph cluster_metadata {
+            label="Metadata Trees";
+            style=filled;
+            color=white;
+            
+            db_meta [label="{__meta__:databases|{name|DatabaseConfig (JSON)}}"];
+            db_ids [label="{__meta__:database_ids|{UUID|database_name}}"];
+            tbl_meta [label="{__meta__:tables|{db.table|TableConfig (JSON)}}"];
+            tbl_ids [label="{__meta__:table_ids|{UUID|db.table}}"];
+        }
+        
+        // Document Trees
+        subgraph cluster_documents {
+            label="Document Trees";
+            style=filled;
+            color=white;
+            
+            docs [label="{db:UUID:table:UUID:docs|{primary_key|Document (JSON)}}"];
+            idx [label="{db:UUID:table:UUID:idx|{index_name:key|value}}"];
+        }
+    }
+    
+    // Cluster: Rust Types
+    subgraph cluster_types {
+        label="Rust Data Structures";
+        style=filled;
+        color=lightblue;
+        
+        database_id [label="{DatabaseId|+ uuid: Uuid (128-bit)|+ new() → Self|+ as_bytes() → \[u8; 16\]}"];
+        database_config [label="{DatabaseConfig|+ id: DatabaseId|+ name: String|+ created_at: u64|+ new(name) → Self}"];
+        
+        table_id [label="{TableId|+ uuid: Uuid (128-bit)|+ new() → Self|+ as_bytes() → \[u8; 16\]}"];
+        table_config [label="{TableConfig|+ id: TableId|+ name: String|+ database_id: DatabaseId|+ primary_key: String|+ doc_count: u64|+ indexes: Vec\<String\>|+ created_at: u64}"];
+        
+        document [label="{Document|JSON object with primary key|Serialized as Vec\<u8\>}"];
+    }
+    
+    // Cluster: API Layer
+    subgraph cluster_api {
+        label="HTTP REST API";
+        style=filled;
+        color=lightgreen;
+        
+        api_db_list [label="GET /api/dbs\nList databases"];
+        api_db_create [label="POST /api/dbs\nCreate database"];
+        api_db_get [label="GET /api/dbs/:name\nGet database info"];
+        api_db_drop [label="DELETE /api/dbs/:name\nDrop database"];
+        
+        api_tbl_list [label="GET /api/dbs/:db/tables\nList tables"];
+        api_tbl_create [label="POST /api/dbs/:db/tables\nCreate table"];
+        api_tbl_drop [label="DELETE /api/dbs/:db/tables/:tbl\nDrop table"];
+    }
+    
+    // Cluster: Example Data
+    subgraph cluster_example {
+        label="Example: test_app Database";
+        style=filled;
+        color=lightyellow;
+        
+        ex_db [label="{test_app|UUID: e15f6f24-...|created_at: 1765243542}"];
+        ex_tbl_users [label="{users|UUID: cf452f29-...|primary_key: id|doc_count: 0}"];
+        ex_tbl_posts [label="{posts|UUID: 7a3b2c1d-...|primary_key: id|doc_count: 0}"];
+        
+        ex_doc1 [label="{user_123|\{\"id\":\"user_123\",\n \"name\":\"Alice\",\n \"email\":\"alice@example.com\"\}}"];
+        ex_doc2 [label="{user_456|\{\"id\":\"user_456\",\n \"name\":\"Bob\",\n \"email\":\"bob@example.com\"\}}"];
+    }
+    
+    // Relationships: Type to Storage
+    database_config -> db_meta [label="stored in", style=dashed];
+    database_id -> db_ids [label="reverse lookup", style=dashed];
+    table_config -> tbl_meta [label="stored in", style=dashed];
+    table_id -> tbl_ids [label="reverse lookup", style=dashed];
+    document -> docs [label="stored in", style=dashed];
+    
+    // Relationships: Hierarchy
+    database_config -> table_config [label="1:N\nhas tables", color=blue, penwidth=2];
+    table_config -> document [label="1:N\nhas documents", color=blue, penwidth=2];
+    
+    // Relationships: API to Types
+    api_db_list -> database_config [label="returns", color=green];
+    api_db_create -> database_config [label="creates", color=green];
+    api_db_get -> database_config [label="reads", color=green];
+    api_db_drop -> database_config [label="deletes", color=red];
+    
+    api_tbl_list -> table_config [label="returns", color=green];
+    api_tbl_create -> table_config [label="creates", color=green];
+    api_tbl_drop -> table_config [label="deletes", color=red];
+    
+    // Relationships: Example
+    ex_db -> ex_tbl_users [label="contains"];
+    ex_db -> ex_tbl_posts [label="contains"];
+    ex_tbl_users -> ex_doc1 [label="contains"];
+    ex_tbl_users -> ex_doc2 [label="contains"];
+    
+    // Legend
+    subgraph cluster_legend {
+        label="Legend";
+        style=filled;
+        color=white;
+        
+        leg1 [label="Blue arrows: Ownership hierarchy", color=blue, fontcolor=blue];
+        leg2 [label="Green arrows: Read/Write operations", color=green, fontcolor=green];
+        leg3 [label="Red arrows: Delete operations", color=red, fontcolor=red];
+        leg4 [label="Dashed arrows: Storage mapping", style=dashed];
+        
+        leg1 -> leg2 [style=invis];
+        leg2 -> leg3 [style=invis];
+        leg3 -> leg4 [style=invis];
+    }
+}

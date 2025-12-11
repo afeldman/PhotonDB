@@ -1,0 +1,28 @@
+apiVersion: v2
+name: rethinkdb
+description: A Helm chart for RethinkDB 3.0 - The open-source database for the realtime web with Kubernetes auto-scaling
+type: application
+version: 3.0.0
+appVersion: "3.0.0"
+
+keywords:
+  - database
+  - nosql
+  - realtime
+  - rethinkdb
+  - clustering
+  - autoscaling
+
+home: https://rethinkdb.com
+sources:
+  - https://github.com/rethinkdb/rethinkdb
+
+maintainers:
+  - name: Anton Feldmann
+    email: anton.feldmann@gmail.com
+
+icon: https://rethinkdb.com/assets/images/docs/api_illustrations/table-config.png
+
+annotations:
+  category: Database
+  licenses: Apache-2.0

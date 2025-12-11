@@ -1,0 +1,121 @@
+2025-12-09T00:58:08.141941Z  INFO rethinkdb: 🚀 RethinkDB 3.0 starting...
+2025-12-09T00:58:08.142055Z  INFO rethinkdb: Version information version=3.0.0-alpha
+2025-12-09T00:58:08.182040Z  INFO rethinkdb::storage::btree: Opened Sled database path=data/rethinkdb
+2025-12-09T00:58:08.182720Z  INFO rethinkdb: ✅ Storage initialized
+2025-12-09T00:58:08.200769Z  INFO rethinkdb: Starting HTTP server addr=127.0.0.1 port=8080
+2025-12-09T00:58:08.200873Z  INFO rethinkdb::server: Starting RethinkDB 3.0 HTTP server addr=127.0.0.1 port=8080
+2025-12-09T00:58:08.201998Z  INFO rethinkdb::server: Server listening on http://127.0.0.1:8080
+2025-12-09T00:58:08.202017Z  INFO rethinkdb::server: 📊 Dashboard: http://127.0.0.1:8080/_admin
+2025-12-09T00:58:08.202031Z  INFO rethinkdb::server: 🔍 Metrics: http://127.0.0.1:8080/_metrics
+2025-12-09T00:58:08.202045Z  INFO rethinkdb::server: ❤️  Health: http://127.0.0.1:8080/_health
+2025-12-09T00:59:03.103446Z  INFO rethinkdb: 🚀 RethinkDB 3.0 starting...
+2025-12-09T00:59:03.103549Z  INFO rethinkdb: Version information version=3.0.0-alpha
+2025-12-09T00:59:03.174723Z  INFO rethinkdb::storage::btree: Opened Sled database path=data/rethinkdb
+2025-12-09T00:59:03.174812Z  INFO rethinkdb: ✅ Storage initialized
+2025-12-09T00:59:03.174858Z  INFO rethinkdb: Starting HTTP server addr=127.0.0.1 port=8080
+2025-12-09T00:59:03.174925Z  INFO rethinkdb::server: Starting RethinkDB 3.0 HTTP server addr=127.0.0.1 port=8080
+2025-12-09T00:59:03.178890Z  INFO rethinkdb::server: Server listening on http://127.0.0.1:8080
+2025-12-09T00:59:03.178923Z  INFO rethinkdb::server: 📊 Dashboard: http://127.0.0.1:8080/_admin
+2025-12-09T00:59:03.178946Z  INFO rethinkdb::server: 🔍 Metrics: http://127.0.0.1:8080/_metrics
+2025-12-09T00:59:03.178965Z  INFO rethinkdb::server: ❤️  Health: http://127.0.0.1:8080/_health
+2025-12-09T00:59:18.623032Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T00:59:18.623081Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T00:59:25.446318Z  INFO execute_query: rethinkdb::server::handlers: Executing query query=r.db_list()
+2025-12-09T00:59:25.446361Z  INFO execute_query:execute: rethinkdb::query: Executing query query=r.db_list()
+2025-12-09T00:59:25.446386Z  INFO execute_query: rethinkdb::server::handlers: Query completed duration_ms=0
+2025-12-09T00:59:37.284105Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T00:59:37.284147Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T00:59:42.270283Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T00:59:42.270346Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T00:59:47.271960Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T00:59:47.272072Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T00:59:52.273501Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T00:59:52.273793Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T00:59:57.273165Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T00:59:57.273277Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:00:02.270977Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:00:02.271078Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:00:07.273595Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:00:07.273787Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:00:12.268219Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:00:12.268259Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:00:17.269926Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:00:17.270051Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:00:22.274152Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:00:22.274308Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:00:27.271248Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:00:27.271346Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:00:32.268452Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:00:32.268497Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:00:37.275136Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:00:37.276204Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:00:42.270101Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:00:42.270184Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:00:47.271149Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:00:47.271241Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:00:52.270464Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:00:52.270543Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:00:57.269253Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:00:57.269321Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:01:02.270638Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:01:02.270743Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:01:07.271513Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:01:07.271616Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:01:12.270512Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:01:12.270612Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:01:17.268288Z  INFO list_tables: rethinkdb::server::handlers: Listing all tables
+2025-12-09T01:01:17.268350Z  INFO list_tables:list_tables: rethinkdb::storage::btree: Listed tables count=0
+2025-12-09T01:24:21.373514Z  INFO rethinkdb: 🚀 RethinkDB 3.0 starting...
+2025-12-09T01:24:21.373654Z  INFO rethinkdb: Version information version=3.0.0-alpha
+2025-12-09T01:24:40.891518Z  INFO rethinkdb: 🚀 RethinkDB 3.0 starting...
+2025-12-09T01:24:40.891687Z  INFO rethinkdb: Version information version=3.0.0-alpha
+2025-12-09T01:24:40.959047Z  INFO rethinkdb::storage::btree: Opened Sled database path=data/rethinkdb
+2025-12-09T01:24:40.959136Z  INFO rethinkdb: ✅ Storage initialized
+2025-12-09T01:24:40.959157Z  INFO rethinkdb: 🔒 Production mode: Security enabled
+2025-12-09T01:24:40.959258Z  INFO rethinkdb: Starting HTTP server addr=127.0.0.1 port=8080
+2025-12-09T01:24:40.959328Z  INFO rethinkdb::server: Starting RethinkDB 3.0 HTTP server addr=127.0.0.1 port=8080
+2025-12-09T01:24:40.959436Z  INFO rethinkdb::server: 🔒 Security middleware enabled
+2025-12-09T01:24:40.961255Z  INFO rethinkdb::server: Security state initialized (middleware integration pending)
+2025-12-09T01:24:40.961425Z  INFO rethinkdb::server: Server listening on http://127.0.0.1:8080
+2025-12-09T01:24:40.961444Z  INFO rethinkdb::server: 📊 Dashboard: http://127.0.0.1:8080/_admin
+2025-12-09T01:24:40.961456Z  INFO rethinkdb::server: 🔍 Metrics: http://127.0.0.1:8080/_metrics
+2025-12-09T01:24:40.961467Z  INFO rethinkdb::server: ❤️  Health: http://127.0.0.1:8080/_health
+2025-12-09T01:25:06.844905Z  INFO rethinkdb: 🚀 RethinkDB 3.0 starting...
+2025-12-09T01:25:06.844981Z  INFO rethinkdb: Version information version=3.0.0-alpha
+2025-12-09T01:25:06.899555Z  INFO rethinkdb::storage::btree: Opened Sled database path=data/rethinkdb
+2025-12-09T01:25:06.899637Z  INFO rethinkdb: ✅ Storage initialized
+2025-12-09T01:25:06.899771Z  INFO rethinkdb: 🔒 Production mode: Security enabled
+2025-12-09T01:25:06.899853Z  INFO rethinkdb: Starting HTTP server addr=127.0.0.1 port=8080
+2025-12-09T01:25:06.899906Z  INFO rethinkdb::server: Starting RethinkDB 3.0 HTTP server addr=127.0.0.1 port=8080
+2025-12-09T01:25:06.899990Z  INFO rethinkdb::server: 🔒 Security middleware enabled
+2025-12-09T01:25:06.900793Z  INFO rethinkdb::server: Security state initialized (middleware integration pending)
+2025-12-09T01:25:06.900937Z  INFO rethinkdb::server: Server listening on http://127.0.0.1:8080
+2025-12-09T01:25:06.900948Z  INFO rethinkdb::server: 📊 Dashboard: http://127.0.0.1:8080/_admin
+2025-12-09T01:25:06.900958Z  INFO rethinkdb::server: 🔍 Metrics: http://127.0.0.1:8080/_metrics
+2025-12-09T01:25:06.900967Z  INFO rethinkdb::server: ❤️  Health: http://127.0.0.1:8080/_health
+2025-12-09T01:25:25.330620Z  INFO list_databases: rethinkdb::server::database_handlers: Listing all databases
+2025-12-09T01:25:25.330649Z  INFO list_databases: rethinkdb::storage::btree_database: Opening Sled database path=./data
+2025-12-09T01:25:42.824955Z  INFO create_database: rethinkdb::server::database_handlers: Creating database database=test_app
+2025-12-09T01:25:42.824981Z  INFO create_database: rethinkdb::storage::btree_database: Opening Sled database path=./data
+2025-12-09T01:25:42.841652Z  INFO create_database: rethinkdb::storage::btree_database: Database created database=test_app id=e15f6f24-7cb3-40ed-bb48-c8be9d0505b4
+2025-12-09T01:25:42.841689Z  INFO create_database: rethinkdb::server::database_handlers: Database created database=test_app id=e15f6f24-7cb3-40ed-bb48-c8be9d0505b4
+2025-12-09T01:25:56.134380Z  INFO list_databases: rethinkdb::server::database_handlers: Listing all databases
+2025-12-09T01:25:56.134424Z  INFO list_databases: rethinkdb::storage::btree_database: Opening Sled database path=./data
+2025-12-09T01:26:14.772284Z  INFO get_database{name="test_app"}: rethinkdb::server::database_handlers: Getting database info database=test_app
+2025-12-09T01:26:14.772312Z  INFO get_database{name="test_app"}: rethinkdb::storage::btree_database: Opening Sled database path=./data
+2025-12-09T01:26:25.016038Z  INFO create_table{db_name="test_app"}: rethinkdb::server::database_handlers: Creating table database=test_app table=users
+2025-12-09T01:26:25.016066Z  INFO create_table{db_name="test_app"}: rethinkdb::storage::btree_database: Opening Sled database path=./data
+2025-12-09T01:26:25.024677Z  INFO create_table{db_name="test_app"}: rethinkdb::storage::btree_database: Table created database=test_app table=users id=cf452f29-8337-4b5d-9d10-e9c827d6d4eb
+2025-12-09T01:26:25.024739Z  INFO create_table{db_name="test_app"}: rethinkdb::server::database_handlers: Table created database=test_app table=users id=cf452f29-8337-4b5d-9d10-e9c827d6d4eb
+2025-12-09T01:26:41.081178Z  INFO list_tables{db_name="test_app"}: rethinkdb::server::database_handlers: Listing tables database=test_app
+2025-12-09T01:26:41.081232Z  INFO list_tables{db_name="test_app"}: rethinkdb::storage::btree_database: Opening Sled database path=./data
+2025-12-09T01:26:51.170966Z  INFO create_database: rethinkdb::server::database_handlers: Creating database database=analytics
+2025-12-09T01:26:51.170997Z  INFO create_database: rethinkdb::storage::btree_database: Opening Sled database path=./data
+2025-12-09T01:26:51.179000Z  INFO create_database: rethinkdb::storage::btree_database: Database created database=analytics id=cbdf31b3-40f6-453a-9840-047040084f77
+2025-12-09T01:26:51.179081Z  INFO create_database: rethinkdb::server::database_handlers: Database created database=analytics id=cbdf31b3-40f6-453a-9840-047040084f77
+2025-12-09T01:26:58.518158Z  INFO create_table{db_name="analytics"}: rethinkdb::server::database_handlers: Creating table database=analytics table=events
+2025-12-09T01:26:58.518187Z  INFO create_table{db_name="analytics"}: rethinkdb::storage::btree_database: Opening Sled database path=./data
+2025-12-09T01:26:58.536990Z  INFO create_table{db_name="analytics"}: rethinkdb::storage::btree_database: Table created database=analytics table=events id=6e84eaf7-ec60-4bed-852d-c4f24cd54dc4
+2025-12-09T01:26:58.537030Z  INFO create_table{db_name="analytics"}: rethinkdb::server::database_handlers: Table created database=analytics table=events id=6e84eaf7-ec60-4bed-852d-c4f24cd54dc4
+2025-12-09T01:27:05.959989Z  INFO list_databases: rethinkdb::server::database_handlers: Listing all databases
+2025-12-09T01:27:05.960038Z  INFO list_databases: rethinkdb::storage::btree_database: Opening Sled database path=./data

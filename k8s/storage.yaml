@@ -1,0 +1,77 @@
+# Storage Classes for different performance tiers
+---
+# Fast SSD storage for production workloads
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: fast-ssd
+  labels:
+    app: rethinkdb
+    tier: production
+provisioner: kubernetes.io/gce-pd # Change based on your cloud provider
+parameters:
+  type: pd-ssd
+  replication-type: regional-pd
+  fstype: ext4
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+
+---
+# Standard storage for development/testing
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard-disk
+  labels:
+    app: rethinkdb
+    tier: development
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard
+  fstype: ext4
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+
+---
+# Local SSD for maximum performance (ephemeral)
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-ssd
+  labels:
+    app: rethinkdb
+    tier: high-performance
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+
+---
+# Example PersistentVolume for local SSD
+# Note: Create one per node with local SSD
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rethinkdb-local-ssd-0
+  labels:
+    app: rethinkdb
+    type: local-ssd
+spec:
+  capacity:
+    storage: 375Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-ssd
+  local:
+    path: /mnt/disks/ssd0
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - node-1 # Replace with actual node name

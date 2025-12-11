@@ -1,0 +1,40 @@
+// Simplified RethinkDB Database Hierarchy
+// Compile with: dot -Tpng database_hierarchy_simple.dot -o database_hierarchy_simple.png
+
+digraph RethinkDBSimple {
+    rankdir=TB;
+    node [shape=box, style=filled, fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+    
+    labelloc="t";
+    label=<<b>RethinkDB Database Hierarchy (Simplified)</b>>;
+    fontsize=14;
+    
+    // Main entities
+    cluster [label="RethinkDB Cluster", fillcolor=lightblue, shape=box3d];
+    
+    db1 [label="Database: test_app\nUUID: e15f6f24-...", fillcolor=lightgreen];
+    db2 [label="Database: analytics\nUUID: cbdf31b3-...", fillcolor=lightgreen];
+    
+    tbl1 [label="Table: users\nPK: id\nUUID: cf452f29-...", fillcolor=lightyellow];
+    tbl2 [label="Table: posts\nPK: id\nUUID: 7a3b2c1d-...", fillcolor=lightyellow];
+    tbl3 [label="Table: events\nPK: event_id\nUUID: 6e84eaf7-...", fillcolor=lightyellow];
+    
+    doc1 [label="Document:\nuser_123", fillcolor=white];
+    doc2 [label="Document:\nuser_456", fillcolor=white];
+    doc3 [label="Document:\npost_001", fillcolor=white];
+    doc4 [label="Document:\nevent_2023_01", fillcolor=white];
+    
+    // Relationships
+    cluster -> db1 [label="contains"];
+    cluster -> db2 [label="contains"];
+    
+    db1 -> tbl1 [label="has table"];
+    db1 -> tbl2 [label="has table"];
+    db2 -> tbl3 [label="has table"];
+    
+    tbl1 -> doc1 [label="stores"];
+    tbl1 -> doc2 [label="stores"];
+    tbl2 -> doc3 [label="stores"];
+    tbl3 -> doc4 [label="stores"];
+}

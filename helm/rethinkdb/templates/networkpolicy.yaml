@@ -1,0 +1,79 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "rethinkdb.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rethinkdb.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "rethinkdb.selectorLabels" . | nindent 6 }}
+  
+  policyTypes:
+    - Ingress
+    - Egress
+  
+  ingress:
+    # Allow cluster communication
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "rethinkdb.selectorLabels" . | nindent 14 }}
+      ports:
+        - port: {{ .Values.service.clusterPort }}
+          protocol: TCP
+    
+    # Allow client connections
+    {{- if .Values.networkPolicy.allowExternal }}
+    - from: []
+      ports:
+        - port: {{ .Values.service.clientPort }}
+          protocol: TCP
+        - port: {{ .Values.service.httpPort }}
+          protocol: TCP
+    {{- else }}
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - port: {{ .Values.service.clientPort }}
+          protocol: TCP
+        - port: {{ .Values.service.httpPort }}
+          protocol: TCP
+    {{- end }}
+    
+    # Allow metrics scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - port: {{ .Values.service.metricsPort }}
+          protocol: TCP
+  
+  egress:
+    # Allow DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+      ports:
+        - port: 53
+          protocol: UDP
+    
+    # Allow cluster communication
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "rethinkdb.selectorLabels" . | nindent 14 }}
+      ports:
+        - port: {{ .Values.service.clusterPort }}
+          protocol: TCP
+    
+    # Allow external communication if needed
+    {{- if .Values.networkPolicy.allowExternal }}
+    - to:
+        - namespaceSelector: {}
+    {{- end }}
+{{- end }}

@@ -1,0 +1,121 @@
+# Production values for RethinkDB
+# High availability, performance-optimized configuration
+
+replicaCount: 5
+
+image:
+  registry: your-registry.com
+  repository: rethinkdb/rethinkdb
+  tag: "3.0.0"
+  pullPolicy: IfNotPresent
+
+# High-performance resources
+resources:
+  requests:
+    cpu: 2
+    memory: 4Gi
+  limits:
+    cpu: 8
+    memory: 16Gi
+
+# Large persistent storage
+persistence:
+  enabled: true
+  storageClass: fast-ssd
+  size: 500Gi
+
+# Aggressive auto-scaling
+autoscaling:
+  enabled: true
+  minReplicas: 5
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 75
+
+  customMetrics:
+    - name: rethinkdb_queries_per_second
+      targetValue: 2000
+    - name: rethinkdb_active_connections
+      targetValue: 1000
+
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Pods
+          value: 4
+          periodSeconds: 30
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+
+    scaleDown:
+      stabilizationWindowSeconds: 600
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 600
+
+# High availability
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 3
+
+# LoadBalancer with fixed IP
+service:
+  type: LoadBalancer
+  loadBalancerIP: "" # Set your static IP
+  annotations:
+    cloud.google.com/load-balancer-type: "Internal" # For GCP
+
+# Enhanced monitoring
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 15s
+    scrapeTimeout: 10s
+    namespace: monitoring
+    labels:
+      prometheus: kube-prometheus
+
+# Performance configuration
+config:
+  cacheSize: 8192
+  ioThreads: 128
+  logLevel: info
+
+# Spread across zones
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - rethinkdb
+        topologyKey: topology.kubernetes.io/zone
+
+# Node selection for production nodes
+nodeSelector:
+  node.kubernetes.io/instance-type: n2-highmem-8 # GCP example
+
+# Tolerate production taints
+tolerations:
+  - key: "production"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+
+# Security
+podSecurityContext:
+  enabled: true
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsNonRoot: true
+
+# Network isolation
+networkPolicy:
+  enabled: true
+  allowExternal: false

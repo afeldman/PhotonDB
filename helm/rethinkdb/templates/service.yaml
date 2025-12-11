@@ -1,0 +1,88 @@
+# Headless Service for StatefulSet
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rethinkdb.fullname" . }}-headless
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rethinkdb.labels" . | nindent 4 }}
+    app.kubernetes.io/component: headless
+  {{- with .Values.headlessService.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: client
+      port: {{ .Values.service.clientPort }}
+      targetPort: client
+      protocol: TCP
+    - name: cluster
+      port: {{ .Values.service.clusterPort }}
+      targetPort: cluster
+      protocol: TCP
+    - name: http
+      port: {{ .Values.service.httpPort }}
+      targetPort: http
+      protocol: TCP
+  selector:
+    {{- include "rethinkdb.selectorLabels" . | nindent 4 }}
+
+---
+# Client Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rethinkdb.fullname" . }}-client
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rethinkdb.labels" . | nindent 4 }}
+    app.kubernetes.io/component: client
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  {{- if and (eq .Values.service.type "LoadBalancer") .Values.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+  {{- end }}
+  ports:
+    - name: client
+      port: {{ .Values.service.clientPort }}
+      targetPort: client
+      protocol: TCP
+    - name: http
+      port: {{ .Values.service.httpPort }}
+      targetPort: http
+      protocol: TCP
+  selector:
+    {{- include "rethinkdb.selectorLabels" . | nindent 4 }}
+
+{{- if .Values.metrics.enabled }}
+---
+# Metrics Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rethinkdb.fullname" . }}-metrics
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rethinkdb.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: {{ .Values.service.metricsPort | quote }}
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+    - name: metrics
+      port: {{ .Values.service.metricsPort }}
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    {{- include "rethinkdb.selectorLabels" . | nindent 4 }}
+{{- end }}

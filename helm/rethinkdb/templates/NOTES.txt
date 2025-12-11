@@ -1,0 +1,135 @@
+CONGRATULATIONS! You have successfully deployed RethinkDB {{ .Chart.AppVersion }}!
+
+=============================================================================
+RELEASE INFO
+=============================================================================
+Name:        {{ .Release.Name }}
+Namespace:   {{ .Release.Namespace }}
+Chart:       {{ .Chart.Name }}-{{ .Chart.Version }}
+
+=============================================================================
+CLUSTER STATUS
+=============================================================================
+{{- if .Values.autoscaling.enabled }}
+Auto-scaling is ENABLED
+- Min replicas: {{ .Values.autoscaling.minReplicas }}
+- Max replicas: {{ .Values.autoscaling.maxReplicas }}
+- Current replicas: {{ .Values.replicaCount }}
+{{- else }}
+Running with {{ .Values.replicaCount }} replica(s)
+{{- end }}
+
+=============================================================================
+ACCESSING RETHINKDB
+=============================================================================
+
+1. Get the client connection endpoint:
+
+{{- if eq .Values.service.type "LoadBalancer" }}
+   NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+   You can watch the status with:
+
+   kubectl get svc {{ include "rethinkdb.fullname" . }}-client -n {{ .Release.Namespace }} -w
+
+   export SERVICE_IP=$(kubectl get svc {{ include "rethinkdb.fullname" . }}-client -n {{ .Release.Namespace }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+   echo "RethinkDB client: $SERVICE_IP:{{ .Values.service.clientPort }}"
+   echo "RethinkDB admin:  http://$SERVICE_IP:{{ .Values.service.httpPort }}"
+
+{{- else if eq .Values.service.type "NodePort" }}
+   export NODE_PORT=$(kubectl get svc {{ include "rethinkdb.fullname" . }}-client -n {{ .Release.Namespace }} -o jsonpath='{.spec.ports[0].nodePort}')
+   export NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[0].address}')
+   echo "RethinkDB client: $NODE_IP:$NODE_PORT"
+
+{{- else }}
+   # Port-forward to access from localhost
+   kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "rethinkdb.fullname" . }}-client {{ .Values.service.clientPort }}:{{ .Values.service.clientPort }} &
+   kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "rethinkdb.fullname" . }}-client {{ .Values.service.httpPort }}:{{ .Values.service.httpPort }} &
+
+   echo "RethinkDB client: localhost:{{ .Values.service.clientPort }}"
+   echo "RethinkDB admin:  http://localhost:{{ .Values.service.httpPort }}"
+{{- end }}
+
+2. Connect to RethinkDB:
+
+   Using Python:
+   
+   pip install rethinkdb
+   
+   import rethinkdb as r
+   r.connect(host='{{ include "rethinkdb.fullname" . }}-client.{{ .Release.Namespace }}.svc.cluster.local', port={{ .Values.service.clientPort }})
+
+   Using Node.js:
+   
+   npm install rethinkdb
+   
+   const r = require('rethinkdb');
+   r.connect({host: '{{ include "rethinkdb.fullname" . }}-client.{{ .Release.Namespace }}.svc.cluster.local', port: {{ .Values.service.clientPort }}})
+
+=============================================================================
+WEB ADMINISTRATION
+=============================================================================
+
+Access the RethinkDB web interface:
+
+{{- if eq .Values.service.type "LoadBalancer" }}
+   http://$SERVICE_IP:{{ .Values.service.httpPort }}
+{{- else }}
+   kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "rethinkdb.fullname" . }}-client {{ .Values.service.httpPort }}:{{ .Values.service.httpPort }}
+   
+   Then visit: http://localhost:{{ .Values.service.httpPort }}
+{{- end }}
+
+=============================================================================
+MONITORING
+=============================================================================
+
+{{- if .Values.metrics.enabled }}
+Prometheus metrics available at:
+
+   kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "rethinkdb.fullname" . }}-metrics {{ .Values.service.metricsPort }}:{{ .Values.service.metricsPort }}
+   
+   Metrics endpoint: http://localhost:{{ .Values.service.metricsPort }}/metrics
+
+{{- if .Values.metrics.serviceMonitor.enabled }}
+ServiceMonitor created for Prometheus Operator integration.
+{{- end }}
+{{- end }}
+
+{{- if .Values.autoscaling.enabled }}
+
+View HPA status:
+
+   kubectl get hpa {{ include "rethinkdb.fullname" . }} -n {{ .Release.Namespace }}
+   kubectl describe hpa {{ include "rethinkdb.fullname" . }} -n {{ .Release.Namespace }}
+{{- end }}
+
+=============================================================================
+USEFUL COMMANDS
+=============================================================================
+
+Check pod status:
+   kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "rethinkdb.name" . }}
+
+View logs:
+   kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "rethinkdb.name" . }} -f
+
+Run Helm tests:
+   helm test {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+Upgrade deployment:
+   helm upgrade {{ .Release.Name }} rethinkdb/{{ .Chart.Name }} -n {{ .Release.Namespace }}
+
+Scale manually (if autoscaling disabled):
+   kubectl scale statefulset {{ include "rethinkdb.fullname" . }} --replicas=5 -n {{ .Release.Namespace }}
+
+=============================================================================
+DOCUMENTATION
+=============================================================================
+
+Chart repository: https://github.com/your-org/rethinkdb-helm
+RethinkDB docs:   https://rethinkdb.com/docs/
+Issues & support: https://github.com/your-org/rethinkdb-helm/issues
+
+=============================================================================
+
+Enjoy your RethinkDB cluster! 🚀

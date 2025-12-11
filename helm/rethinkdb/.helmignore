@@ -1,0 +1,50 @@
+# Patterns to ignore when building packages
+.helmignore
+.git
+.gitignore
+.bzr
+.bzrignore
+.hg
+.hgignore
+.svn
+
+# Temporary files
+*.swp
+*.bak
+*.tmp
+*.orig
+*~
+.DS_Store
+
+# Editor files
+.idea/
+.vscode/
+*.iml
+
+# CI files
+.travis.yml
+.gitlab-ci.yml
+.github/
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Test files
+tests/
+test/
+*_test.go
+*_test.yaml
+
+# Build artifacts
+*.tar.gz
+*.tgz
+
+# Development values
+values-*.yaml
+!values.yaml
+
+# Scripts
+*.sh
+Makefile

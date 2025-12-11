@@ -1,0 +1,69 @@
+// RethinkDB Storage Layout (Sled B-Tree Key Prefixes)
+// Compile with: dot -Tpng storage_layout.dot -o storage_layout.png
+
+digraph StorageLayout {
+    rankdir=LR;
+    node [shape=record, fontname="Courier"];
+    edge [fontname="Helvetica", fontsize=9];
+    
+    labelloc="t";
+    label=<<b>RethinkDB Sled B-Tree Storage Layout</b>>;
+    fontsize=14;
+    
+    // Key prefixes
+    subgraph cluster_keys {
+        label="Key Prefixes (Namespace Isolation)";
+        style=filled;
+        color=lightgrey;
+        
+        key_db_name [label="databases by name\nDatabaseConfig JSON", fillcolor=lightblue, style=filled];
+        key_db_id [label="database IDs\ndatabase_name String", fillcolor=lightblue, style=filled];
+        key_tbl_name [label="tables by name\nTableConfig JSON", fillcolor=lightgreen, style=filled];
+        key_tbl_id [label="table IDs\ndb.table String", fillcolor=lightgreen, style=filled];
+        key_docs [label="documents\nDocument JSON", fillcolor=lightyellow, style=filled];
+        key_idx [label="indexes\nvalue", fillcolor=orange, style=filled];
+    }
+    
+    // Example keys
+    subgraph cluster_examples {
+        label="Example Keys";
+        style=filled;
+        color=white;
+        
+        ex1 [label="meta:databases:test_app", shape=note];
+        ex2 [label="meta:database_ids:e15f6f24", shape=note];
+        ex3 [label="meta:tables:test_app.users", shape=note];
+        ex4 [label="meta:table_ids:cf452f29", shape=note];
+        ex5 [label="db:e15f:table:cf45:docs:user_123", shape=note];
+        ex6 [label="db:e15f:table:cf45:idx:email:alice", shape=note];
+    }
+    
+    // Connections
+    key_db_name -> ex1 [label="e.g.", style=dashed];
+    key_db_id -> ex2 [label="e.g.", style=dashed];
+    key_tbl_name -> ex3 [label="e.g.", style=dashed];
+    key_tbl_id -> ex4 [label="e.g.", style=dashed];
+    key_docs -> ex5 [label="e.g.", style=dashed];
+    key_idx -> ex6 [label="e.g.", style=dashed];
+    
+    // Operations
+    subgraph cluster_operations {
+        label="Common Operations";
+        style=filled;
+        color=lightcyan;
+        
+        op1 [label="List databases\nscan_prefix", shape=box];
+        op2 [label="Get database by name\nget by key", shape=box];
+        op3 [label="Get database by ID\nreverse lookup", shape=box];
+        op4 [label="List tables in database\nscan_prefix", shape=box];
+        op5 [label="Get document\nget by key", shape=box];
+        op6 [label="Count documents\ncount scan", shape=box];
+    }
+    
+    op1 -> key_db_name [style=dotted, color=blue];
+    op2 -> key_db_name [style=dotted, color=blue];
+    op3 -> key_db_id [style=dotted, color=blue];
+    op4 -> key_tbl_name [style=dotted, color=blue];
+    op5 -> key_docs [style=dotted, color=blue];
+    op6 -> key_docs [style=dotted, color=blue];
+}

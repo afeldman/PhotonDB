@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "rethinkdb.fullname" . }}-test-connection
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rethinkdb.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  restartPolicy: Never
+  containers:
+    - name: test
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - |
+          echo "Testing RethinkDB connection..."
+          
+          # Test client port
+          if nc -zv {{ include "rethinkdb.fullname" . }}-client {{ .Values.service.clientPort }}; then
+            echo "✓ Client port {{ .Values.service.clientPort }} is accessible"
+          else
+            echo "✗ Client port {{ .Values.service.clientPort }} is not accessible"
+            exit 1
+          fi
+          
+          # Test HTTP admin port
+          if nc -zv {{ include "rethinkdb.fullname" . }}-client {{ .Values.service.httpPort }}; then
+            echo "✓ HTTP admin port {{ .Values.service.httpPort }} is accessible"
+          else
+            echo "✗ HTTP admin port {{ .Values.service.httpPort }} is not accessible"
+            exit 1
+          fi
+          
+          echo "All connection tests passed!"

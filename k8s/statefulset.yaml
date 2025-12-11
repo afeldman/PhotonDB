@@ -1,0 +1,425 @@
+# RethinkDB 3.0 - Kubernetes Deployment
+# StatefulSet for persistent database nodes
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rethinkdb
+  labels:
+    app: rethinkdb
+    environment: production
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rethinkdb
+  namespace: rethinkdb
+  labels:
+    app: rethinkdb
+
+---
+# Headless Service for StatefulSet
+apiVersion: v1
+kind: Service
+metadata:
+  name: rethinkdb
+  namespace: rethinkdb
+  labels:
+    app: rethinkdb
+spec:
+  clusterIP: None # Headless service for StatefulSet
+  publishNotReadyAddresses: true
+  ports:
+    - name: client
+      port: 28015
+      targetPort: 28015
+      protocol: TCP
+    - name: cluster
+      port: 29015
+      targetPort: 29015
+      protocol: TCP
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: rethinkdb
+
+---
+# Client Service (LoadBalancer/ClusterIP)
+apiVersion: v1
+kind: Service
+metadata:
+  name: rethinkdb-client
+  namespace: rethinkdb
+  labels:
+    app: rethinkdb
+    service: client
+spec:
+  type: LoadBalancer # Change to ClusterIP for internal-only access
+  ports:
+    - name: client
+      port: 28015
+      targetPort: 28015
+      protocol: TCP
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: rethinkdb
+    role: master
+
+---
+# Metrics Service for Prometheus
+apiVersion: v1
+kind: Service
+metadata:
+  name: rethinkdb-metrics
+  namespace: rethinkdb
+  labels:
+    app: rethinkdb
+    service: metrics
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+    - name: metrics
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+  selector:
+    app: rethinkdb
+
+---
+# ConfigMap for RethinkDB configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rethinkdb-config
+  namespace: rethinkdb
+  labels:
+    app: rethinkdb
+data:
+  rethinkdb.conf: |
+    # RethinkDB Configuration
+    bind=all
+    directory=/data
+
+    # Cluster settings
+    cluster-mode=kubernetes
+    join-timeout=30
+
+    # Performance tuning
+    cache-size=2048
+    io-threads=64
+
+    # Logging
+    log-level=info
+    log-file=/var/log/rethinkdb/rethinkdb.log
+
+  init.sh: |
+    #!/bin/bash
+    set -e
+
+    # Wait for DNS to be ready
+    until nslookup rethinkdb.rethinkdb.svc.cluster.local; do
+      echo "Waiting for DNS..."
+      sleep 2
+    done
+
+    # Determine if this is the first node
+    POD_INDEX="${HOSTNAME##*-}"
+    if [ "$POD_INDEX" = "0" ]; then
+      echo "Starting as initial master node"
+      exec rethinkdb --bind all --directory /data --canonical-address $POD_IP --cluster-port 29015
+    else
+      echo "Joining cluster as replica"
+      exec rethinkdb --bind all --directory /data --canonical-address $POD_IP --cluster-port 29015 --join rethinkdb-0.rethinkdb.rethinkdb.svc.cluster.local:29015
+    fi
+
+---
+# StatefulSet for RethinkDB nodes
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rethinkdb
+  namespace: rethinkdb
+  labels:
+    app: rethinkdb
+    component: database
+spec:
+  serviceName: rethinkdb
+  replicas: 3
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
+  selector:
+    matchLabels:
+      app: rethinkdb
+  template:
+    metadata:
+      labels:
+        app: rethinkdb
+        component: database
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: rethinkdb
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsNonRoot: true
+
+      # Anti-affinity to spread pods across nodes
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - rethinkdb
+                topologyKey: kubernetes.io/hostname
+
+      initContainers:
+        - name: init-permissions
+          image: busybox:1.36
+          command: ["sh", "-c", "chown -R 1000:1000 /data && chmod 755 /data"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          securityContext:
+            runAsUser: 0
+
+      containers:
+        - name: rethinkdb
+          image: rethinkdb:latest # Replace with your image
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: client
+              containerPort: 28015
+              protocol: TCP
+            - name: cluster
+              containerPort: 29015
+              protocol: TCP
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: RETHINKDB_CLUSTER_MODE
+              value: "kubernetes"
+            - name: RUST_LOG
+              value: "info"
+            - name: RUST_BACKTRACE
+              value: "1"
+
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2
+              memory: 4Gi
+
+          # Liveness probe - checks if process is alive
+          livenessProbe:
+            tcpSocket:
+              port: 28015
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+
+          # Readiness probe - checks if ready to serve traffic
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+            successThreshold: 1
+
+          # Startup probe - allows for slow startup
+          startupProbe:
+            httpGet:
+              path: /health/startup
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 30
+            successThreshold: 1
+
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /etc/rethinkdb
+            - name: logs
+              mountPath: /var/log/rethinkdb
+
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 15"] # Grace period for connection draining
+
+      volumes:
+        - name: config
+          configMap:
+            name: rethinkdb-config
+            defaultMode: 0755
+        - name: logs
+          emptyDir: {}
+
+      terminationGracePeriodSeconds: 60
+
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          app: rethinkdb
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: fast-ssd # Adjust based on your storage class
+        resources:
+          requests:
+            storage: 100Gi
+
+---
+# PodDisruptionBudget for high availability
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: rethinkdb-pdb
+  namespace: rethinkdb
+  labels:
+    app: rethinkdb
+spec:
+  minAvailable: 2 # Always keep at least 2 pods running
+  selector:
+    matchLabels:
+      app: rethinkdb
+
+---
+# HorizontalPodAutoscaler for auto-scaling
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: rethinkdb-hpa
+  namespace: rethinkdb
+  labels:
+    app: rethinkdb
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: rethinkdb
+
+  minReplicas: 3
+  maxReplicas: 10
+
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+      selectPolicy: Max
+
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 300
+      selectPolicy: Min
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+    # Custom metrics (requires metrics-server and custom metrics API)
+    - type: Pods
+      pods:
+        metric:
+          name: rethinkdb_queries_per_second
+        target:
+          type: AverageValue
+          averageValue: "1000"
+
+    - type: Pods
+      pods:
+        metric:
+          name: rethinkdb_active_connections
+        target:
+          type: AverageValue
+          averageValue: "500"
+
+---
+# ServiceMonitor for Prometheus Operator
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: rethinkdb
+  namespace: rethinkdb
+  labels:
+    app: rethinkdb
+    prometheus: kube-prometheus
+spec:
+  selector:
+    matchLabels:
+      app: rethinkdb
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics
+      scheme: http

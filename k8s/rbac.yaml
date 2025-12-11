@@ -1,0 +1,129 @@
+# RBAC Configuration for RethinkDB Kubernetes Integration
+# Required for auto-discovery and dynamic scaling
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rethinkdb
+  namespace: rethinkdb
+  labels:
+    app: rethinkdb
+
+---
+# ClusterRole for read-only access to cluster resources
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: rethinkdb-cluster-reader
+  labels:
+    app: rethinkdb
+rules:
+  # Read pods for service discovery
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+
+  # Read services for cluster formation
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "watch"]
+
+  # Read endpoints for load balancing
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["get", "list", "watch"]
+
+  # Read nodes for topology awareness
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+
+---
+# Role for managing RethinkDB resources in namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: rethinkdb-operator
+  namespace: rethinkdb
+  labels:
+    app: rethinkdb
+rules:
+  # Manage StatefulSets
+  - apiGroups: ["apps"]
+    resources: ["statefulsets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+
+  # Manage StatefulSet scale
+  - apiGroups: ["apps"]
+    resources: ["statefulsets/scale"]
+    verbs: ["get", "update", "patch"]
+
+  # Manage ConfigMaps
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+
+  # Manage Secrets
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+
+  # Manage PVCs
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Read pod status
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+
+  # Read pod logs for debugging
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get", "list"]
+
+  # Manage Services
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+
+  # Manage Events for logging
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+
+---
+# ClusterRoleBinding for cluster-wide read access
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: rethinkdb-cluster-reader
+  labels:
+    app: rethinkdb
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: rethinkdb-cluster-reader
+subjects:
+  - kind: ServiceAccount
+    name: rethinkdb
+    namespace: rethinkdb
+
+---
+# RoleBinding for namespace-scoped operations
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: rethinkdb-operator
+  namespace: rethinkdb
+  labels:
+    app: rethinkdb
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: rethinkdb-operator
+subjects:
+  - kind: ServiceAccount
+    name: rethinkdb
+    namespace: rethinkdb

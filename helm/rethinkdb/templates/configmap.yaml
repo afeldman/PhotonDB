@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rethinkdb.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rethinkdb.labels" . | nindent 4 }}
+data:
+  rethinkdb.conf: |
+    # RethinkDB Configuration
+    bind=all
+    directory=/data
+    
+    # Cluster settings
+    cluster-mode={{ .Values.clusterMode }}
+    join-timeout=30
+    
+    # Performance tuning
+    cache-size={{ .Values.config.cacheSize }}
+    io-threads={{ .Values.config.ioThreads }}
+    
+    # Logging
+    log-level={{ .Values.config.logLevel }}
+    log-file=/var/log/rethinkdb/rethinkdb.log
+
+  init.sh: |
+    #!/bin/bash
+    set -e
+    
+    # Wait for DNS to be ready
+    until nslookup {{ include "rethinkdb.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}; do
+      echo "Waiting for DNS..."
+      sleep 2
+    done
+    
+    # Determine if this is the first node
+    POD_INDEX="${HOSTNAME##*-}"
+    if [ "$POD_INDEX" = "0" ]; then
+      echo "Starting as initial master node"
+      exec rethinkdb --bind all --directory /data --canonical-address $POD_IP --cluster-port {{ .Values.service.clusterPort }}
+    else
+      echo "Joining cluster as replica"
+      exec rethinkdb --bind all --directory /data --canonical-address $POD_IP --cluster-port {{ .Values.service.clusterPort }} --join {{ include "rethinkdb.fullname" . }}-0.{{ include "rethinkdb.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}:{{ .Values.service.clusterPort }}
+    fi
